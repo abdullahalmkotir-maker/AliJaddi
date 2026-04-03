@@ -20,7 +20,7 @@ $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 Write-Host ""
 Write-Host "======================================================" -ForegroundColor Cyan
-Write-Host "  AliJaddi — Build System v0.3.0" -ForegroundColor Cyan
+Write-Host "  AliJaddi — Build System v0.2.0-beta" -ForegroundColor Cyan
 Write-Host "======================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -130,7 +130,7 @@ Set-Location $ProjectRoot
 
 function Build-Platform($plat) {
     $cmd = switch ($plat) {
-        "windows" { "flet pack `"main.py`" -n `"AliJaddi`" -i `"assets/icon.ico`" --distpath `"dist`" --add-data `"assets:assets`" --product-name `"AliJaddi`" --file-description `"AliJaddi Desktop App`" --product-version `"0.3.0`" --file-version `"0.3.0.0`" --company-name `"AliJaddi`" -y" }
+        "windows" { "flet pack `"main.py`" -n `"AliJaddi`" -i `"assets/icon.ico`" --distpath `"dist`" --add-data `"assets:assets`" --product-name `"AliJaddi`" --file-description `"AliJaddi Desktop App`" --product-version `"0.2.0`" --file-version `"0.2.0.0`" --company-name `"AliJaddi`" -y" }
         "android" { "flet build apk --product AliJaddi --org com.alijaddi --project AliJaddi --description `"منصة نماذج الذكاء الاصطناعي`"" }
         "ios"     { "flet build ipa --product AliJaddi --org com.alijaddi --project AliJaddi --description `"منصة نماذج الذكاء الاصطناعي`"" }
     }

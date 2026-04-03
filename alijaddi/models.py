@@ -20,8 +20,8 @@ class ModelInfo(TypedDict):
 
 MODEL_REGISTRY: Dict[str, ModelInfo] = {
     "euqid": {
-        "name": "عقد (Euqid)",
-        "description": "إدارة وتحليل العقود — مشروع Euqid",
+        "name": "عقد",
+        "description": "صياغة العقود وتحليل النصوص محلياً، مع اختيار مزامنة ملخص النشاط مع منصة علي جدّي",
         "icon": "📜",
         "project_folder": "Euqid",
         "launch_cmd": "python main.py",

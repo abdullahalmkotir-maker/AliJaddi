@@ -1,0 +1,43 @@
+AliJaddi — أيقونة Blender وهوية بصرية
+=====================================
+
+لماذا لا يمكن "الدخول إلى Blender" من المساعد؟
+  البرنامج يعمل على جهازك فقط. نحن نجهّز لك سكربت Python يبني المشهد تلقائياً.
+
+الخطوات السريعة
+---------------
+1) ثبّت Blender 4.x من https://www.blender.org
+2) افتح Blender → تبويب Scripting → Open → اختر:
+   AliJaddi/assets/blender/alijaddi_icon_setup.py
+3) اضغط Run Script (أو من CMD):
+   "C:\Program Files\Blender Foundation\Blender 4.x\blender.exe" --background --python "...\alijaddi_icon_setup.py"
+
+التخلص من "خبث" صورة الذكاء الاصطناعي
+----------------------------------------
+- لا تعتمد على تتبع (trace) تلقائي للصورة كما هي؛ أعد رسم ع + ج يدوياً كمنحنى Bezier نظيف:
+  Inkscape أو Figma أو Illustrator.
+- خط عمودي واضح يفصل ع عن ج؛ منحنيات متساوية السماكة؛ بدون زوائد أو ضبابية.
+- صدّر SVG (منحنى واحد لكل حرف أو مسار مغلق).
+
+في Blender بعد الاستيراد
+-------------------------
+- Curve → Geometry: Extrude ~0.02–0.05، Bevel Depth ~0.003–0.008 (حسب الحجم).
+- طبّق المادة MAT_Gold على الشعار.
+- اضبط الموضع فوق ALI_ICON_PLATE؛ أخفِ أو احذف HINT_Text.
+- Render: 1024×1024 PNG. فعّل Film Transparent إن أردت أيقونة بدون خلفية.
+
+ضع صورتك المرجعية
+-----------------
+انسخ صورة واتساب/المرجع إلى:
+  AliJaddi/assets/brand/reference_ai_icon.png
+ثم في Blender: Viewport Overlays → Add Image Reference (خلفية للرسم فقط).
+
+هوية مختصرة لـ AliJaddi
+------------------------
+- ألوان: كحلي عميق → أزرق فولاذي (تدرج إجرائي على MAT_IconBase) + ذهب غني (MAT_Gold: Sheen + تباين لوني خفيف).
+- شكل الأيقونة: Rounded square (ALI_ICON_PLATE) مع طبقة Coat لامعة كـ «أيقونة تطبيق».
+- الشعار: ع + ج ثلاثي الأبعاد، حلقات زجاجية (DECO_Ring*) بزوايا دوران بسيطة لكسر التماثل الممل.
+- إضاءة: LIGHT_WarmAccent (دفء ذهبي) + LIGHT_RimCool + تعرض AgX (أو Filmic تلقائياً إن لم يتوفر AgX).
+- كاميرات: CAM_IconFront (أورثو للمتجر) و CAM_IconHero (منظور ترويجي).
+- مركّب: Glare Fog Glow خفيف بعد الرندر.
+- للشفافية: عدّل RENDER_TRANSPARENT = True في أول السكربت ثم أعد التشغيل.

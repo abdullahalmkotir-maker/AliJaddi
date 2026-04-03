@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable
 import flet as ft
 import theme as T
+from alijaddi import __version__ as ALIJADDI_VERSION
 from services.models_data import MODELS
 from services.local_store import (
     get_all_stats, load_settings, set_setting, load_session,
@@ -146,7 +147,7 @@ def build_profile_content(page: ft.Page, auth, on_login_done: Callable, on_logou
             ft.Row([ft.Icon(ft.Icons.INFO_ROUNDED, color=T.primary(page), size=18),
                     ft.Text("حول التطبيق", size=16, weight=ft.FontWeight.W_600, color=T.tx(page))], spacing=8),
             ft.Divider(height=1, color=T.border(page)),
-            _info_row(page, "الإصدار", "0.3.0"),
+            _info_row(page, "الإصدار", ALIJADDI_VERSION),
             _info_row(page, "الإطار", "Flet (Flutter + Python)"),
             _info_row(page, "المنصات", "Windows • Android • iOS"),
             _info_row(page, "وضع الشبكة", "متصل" if not auth.offline_mode else "غير متصل (أوفلاين)"),

@@ -1,31 +1,22 @@
-﻿{
-    "id":  "euqid",
-    "name":  "ط¹ظ‚ط¯",
-    "name_en":  "Euqid",
-    "desc":  "ط¥ط¯ط§ط±ط© ظˆطھط­ظ„ظٹظ„ ط§ظ„ط¹ظ‚ظˆط¯ ط§ظ„ط°ظƒظٹط©",
-    "version":  "1.0.0",
-    "author":  "AliJaddi Team",
-    "icon":  "DESCRIPTION_ROUNDED",
-    "color":  "#F97316",
-    "category":  "productivity",
-    "tags":  [
-                 "ط¹ظ‚ظˆط¯",
-                 "طھط­ظ„ظٹظ„",
-                 "ط°ظƒط§ط، ط§طµط·ظ†ط§ط¹ظٹ",
-                 "ط¥ط¯ط§ط±ط©"
-             ],
-    "folder":  "Euqid",
-    "launch":  "python main.py",
-    "size_mb":  45,
-    "rating":  4.9,
-    "users":  208,
-    "active":  true,
-    "download_url":  "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/euqid.zip",
-    "dependencies":  [
-                         "flet"
-                     ],
-    "screenshots":  [
-
-                    ],
-    "changelog":  "1.0.0: ط§ظ„ط¥طµط¯ط§ط± ط§ظ„ط£ظˆظ„ â€” ط¥ط¯ط§ط±ط© ظˆطھط­ظ„ظٹظ„ ط§ظ„ط¹ظ‚ظˆط¯"
+{
+  "id": "euqid",
+  "name": "عقد",
+  "name_en": "Euqid — Contracts",
+  "desc": "صياغة العقود وتحليل النصوص محلياً — تكامل مع منصة علي جدّي (JWT، مزامنة ملخص النشاط إلى model_user_data، بدون رفع نصوص العقود تلقائياً)",
+  "version": "1.1.0",
+  "author": "Ali Jaddi Platform",
+  "icon": "DESCRIPTION_ROUNDED",
+  "color": "#F97316",
+  "category": "productivity",
+  "tags": ["عقد", "قانون", "عراق", "صياغة", "تحليل", "مدني", "سحابة"],
+  "folder": "Euqid",
+  "launch": "python main.py",
+  "size_mb": 45,
+  "rating": 4.9,
+  "users": 208,
+  "active": true,
+  "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/euqid.zip",
+  "dependencies": ["streamlit", "pywebview", "fpdf", "python-docx", "arabic-reshaper", "python-bidi", "requests", "python-dotenv", "scikit-learn", "joblib"],
+  "screenshots": [],
+  "changelog": "1.1.0: واجهة أوضح، تبويب عقودي المحفوظة، مزامنة ملخص مع السحابة، تمرير ALIJADDI_JWT من المنصة\n1.0.0: الإصدار الأول — صياغة، تحليل، تصدير"
 }

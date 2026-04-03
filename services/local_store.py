@@ -75,13 +75,23 @@ def set_setting(key: str, value):
 
 # ═══════════════════════ SESSION ═══════════════════════
 
-def save_session(email: str, user_id: str, access_token: str, refresh_token: str, stars: int = 0):
+def save_session(
+    email: str,
+    user_id: str,
+    access_token: str,
+    refresh_token: str,
+    stars: int = 0,
+    username: str = "",
+    display_name: str = "",
+):
     _write(_SESSION_FILE, {
         "email": email,
         "user_id": user_id,
         "access_token": access_token,
         "refresh_token": refresh_token,
         "stars": stars,
+        "username": username,
+        "display_name": display_name,
         "saved_at": datetime.now().isoformat(),
     })
 

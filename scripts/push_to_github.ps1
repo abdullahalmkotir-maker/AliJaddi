@@ -30,15 +30,11 @@ if ($existing -notmatch "origin") {
 Write-Host "All files staged." -ForegroundColor Green
 
 # 4) Commit
-& git commit -m "feat: AliJaddi v0.3.0 — addon system + Supabase sync + dynamic models
+& git commit -m "release: AliJaddi v0.2.0-beta — platform + registry alignment
 
-- Add-on manager: install/update/uninstall models from GitHub releases
-- Dynamic model registry: addons/registry.json + per-model manifests
-- Addons store UI tab with install/update/delete buttons
-- Supabase schema for cloud sync (users, user_addons, model_catalog)
-- Auth: dotenv loading, missing-key guard, cloud addon sync on login
-- UX: hero card, availability chips, installed/favorites filters
-- Login: confirm password, email validation, password strength hints"
+- Unified version across Qt/Flet, pyproject, and addon min_platform
+- Beta 0.2 manifests: Mudir, Sniper Perspective; registry platform field
+- Profile/about screens read alijaddi.__version__ (no hardcoded drift)"
 
 Write-Host "Committed." -ForegroundColor Green
 

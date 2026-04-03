@@ -32,3 +32,9 @@ dist/
 # ═══ Local data (لا ترفع بيانات المستخدم) ═══
 *.db
 *.sqlite
+
+# ═══ Supabase CLI (محلي) ═══
+supabase/.temp/
+
+# ═══ حزم تنزيل قديمة — لا تُرفع إلى Git ═══
+تنزيل/**/*.zip

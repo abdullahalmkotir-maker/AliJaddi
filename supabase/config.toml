@@ -1,0 +1,44 @@
+# Rabt Cloud — إعداد CLI المحلي
+# الربط مع المشروع السحابي:  supabase link --project-ref mfhtnfxdfpelrgzonxov
+# الوثائق: https://supabase.com/docs/guides/local-development/cli/config
+
+project_id = "rabt-cloud"
+
+[api]
+enabled = true
+port = 54321
+# يجب إضافة core و qanun في «API → Exposed schemas» للمشروع المضاف على Supabase أيضاً
+schemas = ["public", "graphql_public", "core", "qanun"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+smtp_port = 54325
+pop3_port = 54326
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["http://127.0.0.1:3000"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false

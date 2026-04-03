@@ -1,42 +1,43 @@
 {
   "schema_version": 2,
   "updated_at": "2026-04-03",
+  "platform": "0.2.0-beta",
   "repo": "abdullahalmkotir-maker/AliJaddi",
   "models": [
     {
       "id": "zakhrafatan",
       "version": "1.0.0",
-      "min_platform": "0.3.0",
+      "min_platform": "0.2.0-beta",
       "manifest": "manifests/zakhrafatan.json"
     },
     {
       "id": "euqid",
-      "version": "1.0.0",
-      "min_platform": "0.3.0",
+      "version": "1.1.0",
+      "min_platform": "0.2.0-beta",
       "manifest": "manifests/euqid.json"
     },
     {
       "id": "tahlil",
       "version": "1.0.0",
-      "min_platform": "0.3.0",
+      "min_platform": "0.2.0-beta",
       "manifest": "manifests/tahlil.json"
     },
     {
       "id": "mudir",
-      "version": "1.0.0",
-      "min_platform": "0.3.0",
+      "version": "0.2.0-beta",
+      "min_platform": "0.2.0-beta",
       "manifest": "manifests/mudir.json"
     },
     {
       "id": "sniper_perspective",
-      "version": "0.1.0-beta",
-      "min_platform": "0.3.0",
+      "version": "0.2.0-beta",
+      "min_platform": "0.2.0-beta",
       "manifest": "manifests/sniper_perspective.json"
     },
     {
       "id": "dental_assistant",
-      "version": "1.0.0",
-      "min_platform": "0.3.0",
+      "version": "1.2.0",
+      "min_platform": "0.2.0-beta",
       "manifest": "manifests/dental_assistant.json"
     }
   ]

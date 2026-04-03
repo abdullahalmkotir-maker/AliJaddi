@@ -187,38 +187,58 @@ def install_model(
     version: str,
     on_progress: Optional[Callable[[str], None]] = None,
     on_done: Optional[Callable[[bool, str], None]] = None,
+    on_detail: Optional[Callable] = None,
 ):
-    """تحميل وتثبيت نموذج (في thread منفصل)."""
+    """تحميل وتثبيت نموذج (في thread منفصل).
+
+    on_detail(pct, downloaded_bytes, total_bytes, speed_bps, phase)
+    provides structured progress for rich UI (progress bars, speed display).
+    """
+    import time as _time
 
     def _work():
         target = _desktop() / folder
         try:
             if on_progress:
                 on_progress("جارٍ التحميل...")
+            if on_detail:
+                on_detail(0, 0, 0, 0, "connecting")
 
             if not download_url:
                 if on_done:
-                    on_done(False, "رابط التحميل غير متوفر لهذا النموذج")
+                    on_done(False, "رابط التنزيل غير متوفر لهذا التطبيق")
                 return
 
             with tempfile.TemporaryDirectory() as tmp:
                 tmp_path = Path(tmp)
                 zip_path = tmp_path / f"{model_id}.zip"
 
-                with httpx.stream("GET", download_url, timeout=60, follow_redirects=True) as resp:
+                with httpx.stream("GET", download_url, timeout=120, follow_redirects=True) as resp:
                     resp.raise_for_status()
                     total = int(resp.headers.get("content-length", 0))
                     downloaded = 0
+                    t_start = _time.monotonic()
+                    last_report = 0.0
                     with open(zip_path, "wb") as f:
                         for chunk in resp.iter_bytes(chunk_size=65536):
                             f.write(chunk)
                             downloaded += len(chunk)
-                            if on_progress and total:
-                                pct = int(downloaded / total * 100)
-                                on_progress(f"جارٍ التحميل... {pct}%")
+                            now = _time.monotonic()
+                            elapsed = now - t_start
+                            speed = int(downloaded / elapsed) if elapsed > 0.1 else 0
+                            pct = int(downloaded / total * 100) if total else 0
+
+                            if now - last_report >= 0.25:
+                                last_report = now
+                                if on_progress and total:
+                                    on_progress(f"جارٍ التحميل... {pct}%")
+                                if on_detail:
+                                    on_detail(pct, downloaded, total, speed, "downloading")
 
                 if on_progress:
                     on_progress("جارٍ فك الضغط...")
+                if on_detail:
+                    on_detail(100, downloaded, total, 0, "extracting")
 
                 with zipfile.ZipFile(zip_path, "r") as zf:
                     extract_dir = tmp_path / "extracted"
@@ -236,6 +256,8 @@ def install_model(
 
                 mark_installed(model_id, version, folder)
 
+                if on_detail:
+                    on_detail(100, downloaded, total, 0, "done")
                 if on_progress:
                     on_progress("تم التثبيت بنجاح")
                 if on_done:
@@ -243,9 +265,13 @@ def install_model(
 
         except httpx.HTTPStatusError as e:
             msg = f"فشل التحميل: HTTP {e.response.status_code}"
+            if on_detail:
+                on_detail(0, 0, 0, 0, "error")
             if on_done:
                 on_done(False, msg)
         except Exception as e:
+            if on_detail:
+                on_detail(0, 0, 0, 0, "error")
             if on_done:
                 on_done(False, f"خطأ في التثبيت: {e}")
 

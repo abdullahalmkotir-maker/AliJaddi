@@ -15,17 +15,21 @@ def _desktop() -> Path:
     return PLATFORM_ROOT.parent
 
 
+def _has_cloud_sync(folder: Path, model_id: str) -> bool:
+    """يتعرّف على سكربت مزامنة علي جدي سحابة."""
+    if model_id == "mudir":
+        return (folder / "mudir_altawasul" / "integration" / "alijaddi_cloud.py").is_file()
+    return (folder / "alijaddi_cloud_sync.py").is_file()
+
+
 def discover_models() -> Dict[str, Tuple[ModelInfo, Path, bool]]:
-    """يكتشف أي نماذج موجودة فعلاً على سطح المكتب ومعها rabt_cloud_sync.py."""
+    """يكتشف النماذج على سطح المكتب وما إذا كانت تتضمّن مزامنة علي جدي سحابة."""
     desktop = _desktop()
     result: Dict[str, Tuple[ModelInfo, Path, bool]] = {}
     for model_id, info in get_ai_models().items():
         folder = desktop / info["project_folder"]
         if folder.is_dir():
-            has_sync = (folder / "rabt_cloud_sync.py").is_file()
-            if model_id == "mudir":
-                has_sync = (folder / "mudir_altawasul" / "integration" / "rabt_cloud.py").is_file()
-            result[model_id] = (info, folder, has_sync)
+            result[model_id] = (info, folder, _has_cloud_sync(folder, model_id))
     return result
 
 

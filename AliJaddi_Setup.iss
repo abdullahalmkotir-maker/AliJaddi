@@ -1,7 +1,7 @@
 [Setup]
 AppId={{D472A435-3565-4A99-8A93-7BF64F74A1F2}
 AppName=AliJaddi
-AppVersion=0.3.0
+AppVersion=0.2.0
 AppPublisher=AliJaddi
 AppPublisherURL=https://alijaddi.app
 AppSupportURL=https://alijaddi.app

@@ -2,13 +2,13 @@
   "id": "dental_assistant",
   "name": "مساعد طبيب الأسنان",
   "name_en": "Dental Smart Assistant",
-  "desc": "نظام متكامل لإدارة عيادة الأسنان — ملفات المرضى، الجلسات، الصور الشعاعية، التقارير",
-  "version": "1.1.0",
+  "desc": "نظام متكامل لإدارة عيادة الأسنان — ملفات المرضى، الجلسات، الصور الشعاعية، التقارير، تكامل مع منصة علي جدّي",
+  "version": "1.2.0",
   "author": "Ahmed Al-Yassiri",
   "icon": "MEDICAL_SERVICES_ROUNDED",
   "color": "#0D9488",
   "category": "healthcare",
-  "tags": ["أسنان", "عيادة", "طب", "مرضى", "جلسات", "أشعة"],
+  "tags": ["أسنان", "عيادة", "طب", "مرضى", "جلسات", "أشعة", "سحابة"],
   "folder": "Ahmed Al-Yassiri's Smart Assistant",
   "launch": "streamlit run main.py",
   "size_mb": 15,
@@ -16,7 +16,7 @@
   "users": 0,
   "active": true,
   "download_url": "",
-  "dependencies": ["streamlit", "pandas", "plotly", "Pillow", "openpyxl"],
+  "dependencies": ["streamlit", "pandas", "plotly", "Pillow", "openpyxl", "requests"],
   "screenshots": [],
-  "changelog": "1.1.0: نظام مواعيد + مخطط أسنان + خطط علاج + مختبر + نسخ احتياطي + وضع ليلي\n1.0.0: الإصدار الأول — إدارة المرضى، الجلسات، الصور الشعاعية، التقارير"
+  "changelog": "1.2.0: تكامل كامل مع منصة علي جدّي — تسجيل دخول JWT، مزامنة model_user_data مع user_id، عرض النجوم، حالة ربط النموذج، حفظ جلسة المنصة محلياً، payload شامل مع إحصائيات تفصيلية\n1.1.0: نظام مواعيد + مخطط أسنان + خطط علاج + مختبر + نسخ احتياطي + وضع ليلي\n1.0.0: الإصدار الأول — إدارة المرضى، الجلسات، الصور الشعاعية، التقارير"
 }
