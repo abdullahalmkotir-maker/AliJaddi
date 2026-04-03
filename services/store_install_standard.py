@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-معيار تثبيت **تطبيقات المتجر داخل المنصّة** — موافقة المستخدم ثم إما
-**تثبيت تلقائي** في «تطبيقات علي جدي» على سطح المكتب (مع اختصار .lnk) أو **اختيار مجلد أب** يدوياً.
+معيار **store_consent_v2** — التثبيت الفعلي لتطبيقات المتجر يتم عبر **Ali12**
+(``scripts/ali12_store_install.py``) خارج واجهة المنصّة؛ الحاضنة الافتراضية «تطبيقات علي جدي».
 
-**منصّة AliJaddi على Windows:** المثبّت الرسمي Inno (أسلوب Blender) — راجع ``AliJaddi_Setup.iss`` و``training/Ali12_seed.jsonl``.
+دوال ``run_store_install_consent`` تبقى للتوافق مع شيفرة قديمة أو مسارات خاصة؛
+واجهة متجر Qt الحالية لا تستدعي التثبيت المباشر.
+
+**منصّة Windows:** المثبّت الرسمي Inno — ``AliJaddi_Setup.iss`` و``training/Ali12_seed.jsonl``.
 """
 from __future__ import annotations
 

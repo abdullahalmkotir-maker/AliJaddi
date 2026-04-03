@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import platform
+import shutil
 import sys
 from pathlib import Path
 from functools import partial
@@ -34,15 +35,10 @@ from services.addon_manager import (
     check_update,
     get_registry_offline_first,
     refresh_registry_background,
-    install_model,
-    uninstall_model,
     installed_app_path,
 )
-from services.paths import primary_icon_path, apps_root
-from services.store_install_standard import (
-    STORE_INSTALL_CONTRACT_VERSION,
-    run_store_install_consent,
-)
+from services.paths import primary_icon_path, bundle_root
+from services.store_install_standard import STORE_INSTALL_CONTRACT_VERSION
 from services.model_catalog import load_qt_models
 from services.platform_data import LEADERBOARD
 from services.platform_store import (
@@ -267,8 +263,8 @@ class ModelCard(CardFrame):
 # ═══════════════════════════════════════════════════════════
 
 class AddonCard(CardFrame):
-    install_requested = Signal(str, str, str, str)
-    uninstall_requested = Signal(str, str)
+    """بطاقة المتجر: التثبيت/التحديث/الإزالة عبر Ali12 (سطر أوامر) — لا تنزيل داخل المنصّة."""
+    ali12_store_help_requested = Signal(str)
     update_requested = Signal(str, str, str, str)
 
     def __init__(self, model: dict, theme: ThemeManager, registry: dict, parent=None):
@@ -354,65 +350,83 @@ class AddonCard(CardFrame):
         div.setStyleSheet(f"color: {theme.border};")
         body.addWidget(div)
 
-        acts = QHBoxLayout()
-        acts.setSpacing(8)
+        acts_col = QVBoxLayout()
+        acts_col.setSpacing(8)
+        acts_row = QHBoxLayout()
+        acts_row.setSpacing(8)
         folder = model.get("folder", "")
         dl = model.get("download_url", "")
         ver = model.get("version", "")
 
         if is_host_platform:
             if new_ver:
-                acts.addWidget(
+                acts_row.addWidget(
                     _icon_btn(
                         f"تحديث المنصّة إلى {new_ver}", STAR,
                         partial(self._emit_update, mid, "", folder, new_ver),
                         min_h=40,
                     )
                 )
-            acts.addWidget(
+            acts_row.addWidget(
                 _outline_btn(
                     "صفحة إصدارات GitHub",
                     theme.primary,
                     partial(self._emit_update, mid, "", folder, new_ver or local_ver),
                 )
             )
+            acts_col.addLayout(acts_row)
         elif model_installed and exists:
             if new_ver:
-                acts.addWidget(
-                    _icon_btn(
-                        f"تحديث إلى {new_ver}", STAR,
-                        partial(self._emit_update, mid, dl, folder, new_ver),
-                        min_h=40,
-                    )
+                up_lbl = _label(
+                    f"يتوفر في المتجر إصدار {new_ver} — حدّث عبر Ali12 (نفس أمر التثبيت من سطر الأوامر).",
+                    11, color=STAR, wrap=True,
                 )
-            acts.addWidget(
-                _outline_btn(
-                    "إزالة التطبيق", DANGER,
-                    partial(self._emit_uninstall, mid, folder),
-                )
-            )
-        elif active and dl:
-            acts.addWidget(
+                up_lbl.setWordWrap(True)
+                acts_col.addWidget(up_lbl)
+            acts_row.addWidget(
                 _icon_btn(
-                    "تنزيل وتثبيت", color,
-                    partial(self._emit_install, mid, dl, folder, ver),
+                    "تعليمات التثبيت / Ali12", color,
+                    partial(self._emit_ali12_help, mid),
                     min_h=40,
                 )
             )
+            if dl:
+                acts_row.addWidget(
+                    _outline_btn(
+                        "فتح رابط الحزمة",
+                        theme.primary,
+                        partial(QDesktopServices.openUrl, QUrl(dl)),
+                    )
+                )
+            acts_col.addLayout(acts_row)
+        elif active and dl:
+            acts_row.addWidget(
+                _icon_btn(
+                    "تعليمات التثبيت (Ali12)", color,
+                    partial(self._emit_ali12_help, mid),
+                    min_h=40,
+                )
+            )
+            acts_row.addWidget(
+                _outline_btn(
+                    "فتح رابط الحزمة",
+                    theme.primary,
+                    partial(QDesktopServices.openUrl, QUrl(dl)),
+                )
+            )
+            acts_col.addLayout(acts_row)
         elif active:
-            acts.addWidget(_label("التنزيل غير متاح حالياً", 11, color=theme.text2))
+            acts_row.addWidget(_label("التنزيل غير متاح حالياً", 11, color=theme.text2))
+            acts_col.addLayout(acts_row)
 
-        body.addLayout(acts)
+        body.addLayout(acts_col)
 
         body_w = QWidget()
         body_w.setLayout(body)
         main_lay.addWidget(body_w)
 
-    def _emit_install(self, mid, url, folder, ver):
-        self.install_requested.emit(mid, url, folder, ver)
-
-    def _emit_uninstall(self, mid, folder):
-        self.uninstall_requested.emit(mid, folder)
+    def _emit_ali12_help(self, mid: str):
+        self.ali12_store_help_requested.emit(mid)
 
     def _emit_update(self, mid, url, folder, ver):
         self.update_requested.emit(mid, url, folder, ver)
@@ -793,7 +807,9 @@ class MainWindow(QMainWindow):
         h_lay.setSpacing(8)
         hero_title = _label("تطبيقاتك في لمحة", 17, bold=True, color=t.text)
         hero_sub = _label(
-            "تثبيت شبيه بمتاجر النظام: موافقة ثم اختيار مجلد الأب — يُنشأ مجلد التطبيق تلقائياً (المقترح: «تطبيقات علي جدي»). **Ali12** يفسّر الأخطاء عند الفشل.",
+            "التثبيت على سطح المكتب عبر **Ali12** (سطر الأوامر) — المعيار "
+            f"{STORE_INSTALL_CONTRACT_VERSION}. المنصّة تعرض التطبيقات وتشغّل المثبّتة؛ "
+            "المتجر يُظهر الإصدارات والتحديثات بعد مزامنة السجل.",
             12, color=t.text2, wrap=True,
         )
         hero_sub.setMaximumHeight(44)
@@ -1071,11 +1087,12 @@ class MainWindow(QMainWindow):
         hl.setSpacing(6)
         hl.addWidget(_label("متجر التطبيقات", 17, bold=True, color=t.text))
         st_hint = _label(
-            "**علي جدي (المنصّة):** بطاقة مثبّتة أولاً — يقرأ إصدارها من سجل المستودع (`platform`) بعد المزامنة، ثم زر تحديث أو صفحة GitHub. "
-            "**تطبيقات المتجر:** تثبيت تلقائي في «تطبيقات علي جدي»؛ التحديثات من السجل عند ارتفاع رقم الإصدار في `registry.json`.",
+            "**علي جدي (المنصّة):** بطاقة أولاً — إصدار `platform` من السجل بعد المزامنة، ثم تحديث أو صفحة GitHub. "
+            "**تطبيقات المتجر:** لا يُثبَّت من داخل الواجهة؛ استخدم **Ali12** من سطر الأوامر (زر «تعليمات التثبيت» على كل بطاقة). "
+            f"المعيار {STORE_INSTALL_CONTRACT_VERSION} — الحاضنة «تطبيقات علي جدي».",
             12, color=t.text2, wrap=True,
         )
-        st_hint.setMaximumHeight(40)
+        st_hint.setMaximumHeight(56)
         hl.addWidget(st_hint)
         hl.addWidget(_label(i18n.tr("store_offline_hint"), 11, color=t.text2, wrap=True))
 
@@ -1114,9 +1131,8 @@ class MainWindow(QMainWindow):
             grid.addWidget(empty, 0, 0, 1, max(1, grid_cols))
         for i, m in enumerate(filtered_store):
             card = AddonCard(m, t, registry)
-            card.install_requested.connect(self._do_install)
-            card.uninstall_requested.connect(self._do_uninstall)
-            card.update_requested.connect(self._do_install)
+            card.ali12_store_help_requested.connect(self._on_ali12_store_help)
+            card.update_requested.connect(self._on_platform_store_card_action)
             if grid_cols == 1:
                 card.setMaximumWidth(16777215)
                 card.setMinimumWidth(max(260, min(420, cw - 40)))
@@ -1502,150 +1518,55 @@ class MainWindow(QMainWindow):
         if box.clickedButton() == open_btn:
             QDesktopServices.openUrl(QUrl(url))
 
-    def _do_install(self, mid, url, folder, ver):
-        from ui.download_dialog import DownloadDialog
-        from ui.toast import show_toast
-
+    def _on_platform_store_card_action(self, mid, url, folder, ver):
+        """بطاقة المنصّة فقط — تحديث عبر GitHub / Setup وليس تثبيت ZIP للنماذج."""
         if mid == PLATFORM_STORE_ID:
             self._open_platform_update_from_store(registry_hint_ver=str(ver or ""))
-            return
 
-        model = next((m for m in self.models if m["id"] == mid), {})
-        name = model.get("name", mid)
-        color = model.get("color", PRIMARY)
+    def _on_ali12_store_help(self, model_id: str) -> None:
+        """شرح تثبيت/تحديث/إزالة التطبيقات عبر سطر أوامر Ali12 (خارج واجهة المنصّة)."""
+        model = next((m for m in self.models if m["id"] == model_id), {})
+        name = model.get("name", model_id)
+        dl = (model.get("download_url") or "").strip()
+        root = bundle_root()
+        script = root / "scripts" / "ali12_store_install.py"
+        py_exe = shutil.which("py") or shutil.which("python") or shutil.which("python3") or "python"
+        if script.is_file():
+            cmd = f'{py_exe} "{script}" install {model_id}'
+            un_cmd = f'{py_exe} "{script}" uninstall {model_id}'
+        else:
+            cmd = f"python scripts/ali12_store_install.py install {model_id}"
+            un_cmd = f"python scripts/ali12_store_install.py uninstall {model_id}"
 
-        prep = run_store_install_consent(
-            self,
-            model_id=mid,
-            manifest_folder=folder,
-            version=ver,
-            display_name=name,
+        body = (
+            f"التطبيق: {name}  ({model_id})\n\n"
+            "نفّذ من مجلد جذر المشروع (مستنسخ من GitHub):\n\n"
+            f"{cmd}\n\n"
+            "لإزالة التثبيت من القرص وسجل المنصّة:\n\n"
+            f"{un_cmd}\n\n"
+            f"المعيار: {STORE_INSTALL_CONTRACT_VERSION}\n"
+            "عرض كل المعرفات: python scripts/ali12_store_install.py list\n\n"
+            "بعد التثبيت يظهر التطبيق في «تطبيقاتي» ويمكن تشغيله من المنصّة. "
+            "إصدارات التحديث تأتي من سجل متجر علي جدي بعد المزامنة."
         )
-        if prep.apps_parent is None:
-            if prep.cancel_phase == "folder":
-                show_toast(
-                    self,
-                    "أُلغي اختيار المجلد. اضغط «تنزيل وتثبيت» مجدداً لإكمال التثبيت.",
-                    "warning",
-                    4500,
-                )
-            elif prep.cancel_phase == "consent":
-                show_toast(
-                    self,
-                    "أُلغي التثبيت من نافذة الموافقة.",
-                    "info",
-                    3500,
-                )
-            return
+        if dl:
+            body += f"\n\nرابط الحزمة:\n{dl}"
 
-        chosen_path = prep.apps_parent
-
-        dlg = DownloadDialog(name, color, self.theme, self)
-        dlg.show()
-
-        def _progress(msg):
-            pass
-
-        def _detail(pct, downloaded, total, speed, phase):
-            dlg.emit_progress(pct, downloaded, total, speed, phase)
-
-        def _done(ok, msg):
-            QTimer.singleShot(0, lambda: dlg.emit_progress(
-                100, 0, 0, 0, "done" if ok else "error"
-            ))
-            if ok:
-                final_path = chosen_path / folder
-                QTimer.singleShot(
-                    500,
-                    lambda: show_toast(
-                        self,
-                        f"✓ تم تثبيت «{name}» — المجلد: {final_path} "
-                        f"واختصار على سطح المكتب إن نجح إنشاؤه.",
-                        "success",
-                        7000,
-                    ),
-                )
-                QTimer.singleShot(1000, self._rebuild_current_tab)
-            else:
-                from Ali12 import (
-                    ALI12_ASSISTANT_ID,
-                    infer_install_event_kind_from_message,
-                    suggest_after_install_failure,
-                )
-
-                ek = infer_install_event_kind_from_message(msg, ok=False)
-                hint = suggest_after_install_failure(event_kind=ek, message=msg, detail={})
-
-                def _show_err():
-                    show_toast(self, f"تعذّر تنزيل «{name}»: {msg}", "error")
-
-                def _show_ali12():
-                    if hint:
-                        show_toast(
-                            self,
-                            f"{ALI12_ASSISTANT_ID} — {hint}",
-                            "info",
-                            5500,
-                        )
-
-                QTimer.singleShot(400, _show_err)
-                QTimer.singleShot(900, _show_ali12)
-
-        install_model(
-            mid,
-            url,
-            folder,
-            ver,
-            on_progress=_progress,
-            on_done=_done,
-            on_detail=_detail,
-            display_name=name,
-            apps_parent=chosen_path,
-            install_contract=STORE_INSTALL_CONTRACT_VERSION,
-        )
-
-    def _do_uninstall(self, mid, folder):
-        from ui.toast import show_toast
-
-        if mid == PLATFORM_STORE_ID:
-            QMessageBox.information(
-                self,
-                "متجر التطبيقات",
-                "منصّة علي جدي لا تُزال من بطاقة المتجر.\n"
-                "لإزالة التطبيق المثبّت من النظام: «إعدادات Windows» ← «التطبيقات» (إن استخدمت Setup Inno).",
-            )
-            return
-
-        target_path = installed_app_path(mid, folder)
-        reply = QMessageBox.question(
-            self, "إزالة التطبيق",
-            f"سيتم حذف التطبيق من جهازك.\nالمجلد: {target_path}\n"
-            "يمكنك تنزيله مجدداً من متجر التطبيقات في أي وقت.",
-            QMessageBox.Yes | QMessageBox.No,
-        )
-        if reply == QMessageBox.Yes:
-            ok, msg = uninstall_model(mid, folder)
-            if ok:
-                show_toast(self, msg, "success")
-            else:
-                from Ali12 import ALI12_ASSISTANT_ID, suggest_after_install_failure
-
-                hint = suggest_after_install_failure(
-                    event_kind="uninstall_fail", message=msg, detail={}
-                )
-                show_toast(self, msg, "error")
-
-                def _uh():
-                    if hint:
-                        show_toast(
-                            self,
-                            f"{ALI12_ASSISTANT_ID} — {hint}",
-                            "info",
-                            5500,
-                        )
-
-                QTimer.singleShot(600, _uh)
-            self._rebuild_current_tab()
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Information)
+        box.setWindowTitle("Ali12 — تثبيت تطبيقات المتجر")
+        box.setText(body)
+        copy_btn = box.addButton("نسخ أمر التثبيت", QMessageBox.ButtonRole.ActionRole)
+        open_btn = None
+        if dl:
+            open_btn = box.addButton("فتح رابط الحزمة", QMessageBox.ButtonRole.ActionRole)
+        box.addButton("إغلاق", QMessageBox.ButtonRole.RejectRole)
+        box.exec()
+        clicked = box.clickedButton()
+        if clicked == copy_btn:
+            QApplication.clipboard().setText(cmd)
+        elif open_btn is not None and clicked == open_btn:
+            QDesktopServices.openUrl(QUrl(dl))
 
     def _do_login(self):
         dlg = LoginDialog(self.theme, self.auth, self)
