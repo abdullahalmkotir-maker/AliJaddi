@@ -1,4 +1,4 @@
-# AliJaddi — بناء macOS
+# AliJaddi Beta 0.2 — بناء macOS (PySide6)
 
 ## المتطلبات
 - macOS 11 (Big Sur) أو أحدث
@@ -11,7 +11,7 @@
 # 1. انتقل إلى مجلد المشروع
 cd AliJaddi
 
-# 2. ثبّت المتطلبات
+# 2. ثبّت المتطلبات (Qt for Python)
 pip3 install PySide6-Essentials python-dotenv httpx requests pyinstaller
 
 # 3. شغّل سكريبت البناء
@@ -22,4 +22,5 @@ chmod +x build_macos.sh
 open dist/AliJaddi/AliJaddi
 ```
 
-سيتم إنشاء ملف `.app` في مجلد `dist/`.
+- لا يُدمج ملف `.env` في الحزمة؛ انسخ `.env.example` إلى `.env` بجانب التطبيق عند التوزيع.
+- سيتم إنشاء حزمة التطبيق في مجلد `dist/`.

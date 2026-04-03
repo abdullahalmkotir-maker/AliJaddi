@@ -1,4 +1,4 @@
-# AliJaddi — بناء Android
+# AliJaddi Beta 0.2 — بناء Android (PySide6)
 
 ## المتطلبات
 - Python 3.10+

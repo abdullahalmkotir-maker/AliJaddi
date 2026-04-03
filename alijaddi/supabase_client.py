@@ -3,7 +3,7 @@
 متوافق مع:
   - AliJaddiAccount/auth_model/cloud_client.py
   - AliJaddi Cloud/python/integration/model_data_rest.py
-  - rabt_cloud_sync.py في كل مشروع نموذج
+  - alijaddi_cloud_sync.py في كل مشروع نموذج
 """
 from __future__ import annotations
 

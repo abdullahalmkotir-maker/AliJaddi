@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 AliJaddi — المُشغِّل الموحّد
-بدون وسيطة: يفتح تطبيق سطح المكتب (RabtAccount PyQt5)
+بدون وسيطة: يفتح تطبيق سطح المكتب (AliJaddiAccount)
 مع وسيطة model_id: يشغّل النموذج المطلوب
 مع --status: يعرض حالة جميع النماذج
 """
@@ -24,7 +24,7 @@ def _resolve_account_root() -> Path:
 
 def launch_desktop() -> None:
     account = _resolve_account_root()
-    launcher = account / "rabtaccount_platform" / "desktop" / "launcher.py"
+    launcher = account / "alijaddi_platform" / "desktop" / "launcher.py"
     if not launcher.is_file():
         print(f"[!] launcher.py not found at {launcher}")
         sys.exit(1)

@@ -1,60 +1,80 @@
-# AliJaddi — تنزيل (Beta 0.1)
+# AliJaddi — تنزيل (Beta 0.2)
 
 ## علي جدّي — منصة نماذج الذكاء الاصطناعي
 
-**الإصدار:** Beta 0.1  
-**الإطار:** Qt for Python (PySide6)  
+**الإصدار:** Beta 0.2  
+**الإطار:** **Qt for Python (PySide6)** — الواجهة الرئيسية لسطح المكتب  
 **التاريخ:** أبريل 2026
 
 ---
 
-## المنصات المتاحة
+## هيكل المجلد
 
-### Windows
-- **المجلد:** `windows/`
-- **التشغيل:** فك ضغط `AliJaddi-Beta-0.1-Windows.zip` ثم شغّل `AliJaddi.exe`
-- **المتطلبات:** Windows 10 أو أحدث (64-bit)
+| المسار | المحتوى |
+|--------|---------|
+| `windows/` | تعليمات بناء Windows (PyInstaller + PySide6) وموضع حزمة التوزيع بعد البناء |
+| `macos/` | تعليمات بناء macOS |
+| `android/` | تعليمات بناء Android (PySide6 الكامل + NDK) |
 
-### macOS
-- **المجلد:** `macos/`
-- **التعليمات:** شغّل `build_macos.sh` من مجلد المشروع على جهاز Mac
-- **المتطلبات:** macOS 11+ (Intel أو Apple Silicon)
-
-### Android
-- **المجلد:** `android/`
-- **التعليمات:** شغّل `build_android.sh` من مجلد المشروع (يتطلب Android SDK/NDK)
-- **المتطلبات:** Android 8+ (API 26+)
+**ملاحظة:** ملفات ‎`.zip`‎ الكبيرة لا تُرفع إلى Git (مذكور في ‎`.gitignore`‎). بعد البناء محلياً يُنشأ الأرشيف في ‎`تنزيل/windows/`‎ كما في التعليمات.
 
 ---
 
-## الميزات
+## أين تطبيقات النماذج؟ (لماذا لا أراها داخل `تنزيل/`؟)
 
-- 6 نماذج ذكاء اصطناعي (زخرفة، عقد، تحليل، مدير التواصل، مساعد طبيب الأسنان، منظور القناص)
-- متجر إضافات — تثبيت وتحديث النماذج مباشرة
-- نظام مصادقة (اختياري) مع مزامنة سحابية
-- وضع مظلم / فاتح
-- واجهة عربية RTL كاملة
-- يعمل بدون إنترنت
+| ماذا | أين |
+|------|-----|
+| **منصة AliJaddi** (نافذة Qt، متجر الإضافات، تسجيل الدخول) | هنا فقط: بعد البناء يظهر ‎`AliJaddi.exe`‎ في ‎`dist\AliJaddi\`‎ والحزمة ‎`تنزيل\windows\AliJaddi-Beta-0.2-Windows.zip`‎ |
+| **تطبيقات النماذج** (زخرفة، عقد، تحليل، مدير التواصل، مساعد الأسنان، …) | **ليست داخل مجلد تنزيل.** تُثبَّت من داخل المنصة (تبويب المتجر) أو يدوياً من روابط الإصدارات على GitHub؛ تُفك غالباً إلى **سطح المكتب** في مجلدات بأسماء مثل `Zakhrafatan`، `Euqid`، `statistics`، إلخ — وفق ‎`addons/registry.json`‎ و‎`addons/manifests/*.json`‎ |
+| **مشروعك المصدري للتطبيقات** | غالباً في مجلد منفصل مثل ‎`تطبيقات علي جدي`‎ على سطح المكتب (للتطوير)، وليس جزءاً من حزمة ‎`تنزيل`‎ |
+
+**باختصار:** ‎`تنزيل`‎ = توزيع **المنصة الواحدة** فقط؛ النماذج تُدار كإضافات خارج هذا المجلد.
 
 ---
 
-## البناء من المصدر
+## Windows — التوزيع الجاهز (PySide6)
+
+1. من جذر المشروع شغّل ‎`build_windows.bat`‎ (يُثبّت PyInstaller و‎`PySide6-Essentials`‎ ويبني ‎`dist\AliJaddi\`‎).
+2. يُنشأ تلقائياً (عند نجاح البناء) الأرشيف:  
+   **`تنزيل/windows/AliJaddi-Beta-0.2-Windows.zip`**
+3. للمستخدم النهائي: فك الضغط ثم تشغيل ‎`AliJaddi.exe`‎.  
+   انسخ ‎`.env.example`‎ إلى ‎`.env`‎ بجانب التنفيذي إذا احتجت مفاتيح Supabase وغيرها (لا يُدمج ‎`.env`‎ في الحزمة لأسباب أمنية).
+
+التفاصيل: [تنزيل/windows/BUILD_INSTRUCTIONS.md](windows/BUILD_INSTRUCTIONS.md)
+
+---
+
+## macOS
+
+- **التعليمات:** [تنزيل/macos/BUILD_INSTRUCTIONS.md](macos/BUILD_INSTRUCTIONS.md)
+- **البناء:** ‎`build_macos.sh`‎ من جذر المشروع → الناتج ‎`dist/AliJaddi/`‎
+
+---
+
+## Android
+
+- **التعليمات:** [تنزيل/android/BUILD_INSTRUCTIONS.md](android/BUILD_INSTRUCTIONS.md)
+- **البناء:** ‎`build_android.sh`‎ (يتطلب ‎`PySide6`‎ الكامل وليس Essentials فقط)
+
+---
+
+## الميزات (المنصة)
+
+- نماذج ذكاء اصطناعي (زخرفة، عقد، تحليل، مدير التواصل، مساعد طبيب الأسنان، منظور القناص)
+- متجر إضافات — تثبيت وتحديث النماذج
+- مصادقة اختيارية مع مزامنة سحابية
+- مظلم / فاتح، واجهة عربية RTL
+- عمل جزئي دون إنترنت
+
+---
+
+## التشغيل من المصدر (PySide6)
 
 ```bash
-# تثبيت المتطلبات
-pip install PySide6-Essentials python-dotenv httpx requests
+pip install -e .
+# أو: pip install PySide6-Essentials python-dotenv httpx requests
 
-# تشغيل مباشر
 python main_qt.py
-
-# بناء Windows
-build_windows.bat
-
-# بناء macOS
-chmod +x build_macos.sh && ./build_macos.sh
-
-# بناء Android
-chmod +x build_android.sh && ./build_android.sh
 ```
 
 ---

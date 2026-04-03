@@ -1,8 +1,8 @@
 #!/bin/bash
-# AliJaddi — macOS Build (Beta 0.1)
+# AliJaddi — macOS Build (Beta 0.2, PySide6)
 set -e
 echo "═══════════════════════════════════════════"
-echo "  AliJaddi — macOS Build (Beta 0.1)"
+echo "  AliJaddi — macOS Build (Beta 0.2, PySide6)"
 echo "═══════════════════════════════════════════"
 
 pip3 install pyinstaller PySide6-Essentials python-dotenv httpx requests --quiet
@@ -17,10 +17,10 @@ pyinstaller \
     --onedir \
     --icon "icon.png" \
     --add-data "icon.png:." \
-    --add-data ".env:." \
     --add-data "addons:addons" \
     --add-data "services:services" \
     --add-data "ui:ui" \
+    --add-data "alijaddi:alijaddi" \
     --hidden-import "PySide6.QtWidgets" \
     --hidden-import "PySide6.QtCore" \
     --hidden-import "PySide6.QtGui" \
@@ -30,11 +30,16 @@ pyinstaller \
     --hidden-import "ui.theme_qt" \
     --hidden-import "ui.main_window" \
     --hidden-import "ui.login_dialog" \
+    --hidden-import "ui.i18n" \
+    --hidden-import "ui.toast" \
+    --hidden-import "ui.download_dialog" \
+    --hidden-import "alijaddi" \
     --noconfirm \
     main_qt.py
 
 echo "[3/3] Copying assets..."
 cp -f icon.png dist/AliJaddi/ 2>/dev/null || true
+cp -f .env.example dist/AliJaddi/ 2>/dev/null || true
 cp -r addons dist/AliJaddi/ 2>/dev/null || true
 
 echo ""

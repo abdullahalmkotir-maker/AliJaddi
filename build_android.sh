@@ -1,5 +1,5 @@
 #!/bin/bash
-# AliJaddi — Android Build (Beta 0.1)
+# AliJaddi — Android Build (Beta 0.2)
 # Uses pyside6-android-deploy (requires Qt 6.6+ and Android SDK/NDK)
 #
 # Prerequisites:
@@ -12,7 +12,7 @@
 
 set -e
 echo "═══════════════════════════════════════════"
-echo "  AliJaddi — Android Build (Beta 0.1)"
+echo "  AliJaddi — Android Build (Beta 0.2)"
 echo "═══════════════════════════════════════════"
 
 if ! command -v pyside6-android-deploy &>/dev/null; then

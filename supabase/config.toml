@@ -1,8 +1,8 @@
-# Rabt Cloud — إعداد CLI المحلي
+# AliJaddi Cloud — إعداد CLI المحلي (بيتا 0.2)
 # الربط مع المشروع السحابي:  supabase link --project-ref mfhtnfxdfpelrgzonxov
 # الوثائق: https://supabase.com/docs/guides/local-development/cli/config
 
-project_id = "rabt-cloud"
+project_id = "alijaddi-cloud"
 
 [api]
 enabled = true

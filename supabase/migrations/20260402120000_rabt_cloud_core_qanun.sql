@@ -1,4 +1,4 @@
--- Rabt Cloud — هجرة أولية: مخططات core و qanun + RLS + كتالوج النماذج
+-- AliJaddi Cloud — هجرة أولية: مخططات core و qanun + RLS + كتالوج النماذج (اسم الملف تاريخي)
 -- للربط مع GitHub في لوحة Supabase: supabase/migrations/
 
 -- 1. core schema
