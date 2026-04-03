@@ -1,22 +1,32 @@
-{
-  "id": "mudir",
-  "name": "مدير التواصل",
-  "name_en": "Mudir Altawasul",
-  "desc": "جدولة ونشر المحتوى على المنصات الاجتماعية",
-  "version": "1.0.0",
-  "author": "AliJaddi Team",
-  "icon": "CAMPAIGN_ROUNDED",
-  "color": "#06B6D4",
-  "category": "social-media",
-  "tags": ["تواصل", "نشر", "جدولة", "سوشيال ميديا"],
-  "folder": "Mudir Altawasul",
-  "launch": "python run_desktop.py",
-  "size_mb": 35,
-  "rating": 4.6,
-  "users": 73,
-  "active": true,
-  "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/mudir.zip",
-  "dependencies": ["requests", "schedule"],
-  "screenshots": [],
-  "changelog": "1.0.0: الإصدار الأول — جدولة ونشر المحتوى"
+﻿{
+    "id":  "mudir",
+    "name":  "ظ…ط¯ظٹط± ط§ظ„طھظˆط§طµظ„",
+    "name_en":  "Mudir Altawasul",
+    "desc":  "ط¬ط¯ظˆظ„ط© ظˆظ†ط´ط± ط§ظ„ظ…ط­طھظˆظ‰ ط¹ظ„ظ‰ ط§ظ„ظ…ظ†طµط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط©",
+    "version":  "1.0.0",
+    "author":  "AliJaddi Team",
+    "icon":  "CAMPAIGN_ROUNDED",
+    "color":  "#06B6D4",
+    "category":  "social-media",
+    "tags":  [
+                 "طھظˆط§طµظ„",
+                 "ظ†ط´ط±",
+                 "ط¬ط¯ظˆظ„ط©",
+                 "ط³ظˆط´ظٹط§ظ„ ظ…ظٹط¯ظٹط§"
+             ],
+    "folder":  "Mudir Altawasul",
+    "launch":  "python run_desktop.py",
+    "size_mb":  35,
+    "rating":  4.6,
+    "users":  73,
+    "active":  true,
+    "download_url":  "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/mudir.zip",
+    "dependencies":  [
+                         "requests",
+                         "schedule"
+                     ],
+    "screenshots":  [
+
+                    ],
+    "changelog":  "1.0.0: ط§ظ„ط¥طµط¯ط§ط± ط§ظ„ط£ظˆظ„ â€” ط¬ط¯ظˆظ„ط© ظˆظ†ط´ط± ط§ظ„ظ…ط­طھظˆظ‰"
 }
