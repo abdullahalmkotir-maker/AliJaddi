@@ -1,0 +1,22 @@
+{
+  "id": "dental_assistant",
+  "name": "مساعد طبيب الأسنان",
+  "name_en": "Dental Smart Assistant",
+  "desc": "نظام متكامل لإدارة عيادة الأسنان — ملفات المرضى، الجلسات، الصور الشعاعية، التقارير",
+  "version": "1.0.0",
+  "author": "Ahmed Al-Yassiri",
+  "icon": "MEDICAL_SERVICES_ROUNDED",
+  "color": "#0D9488",
+  "category": "healthcare",
+  "tags": ["أسنان", "عيادة", "طب", "مرضى", "جلسات", "أشعة"],
+  "folder": "Ahmed Al-Yassiri's Smart Assistant",
+  "launch": "streamlit run main.py",
+  "size_mb": 15,
+  "rating": 0,
+  "users": 0,
+  "active": true,
+  "download_url": "",
+  "dependencies": ["streamlit", "pandas", "plotly", "Pillow", "openpyxl"],
+  "screenshots": [],
+  "changelog": "1.0.0: الإصدار الأول — إدارة المرضى، الجلسات، الصور الشعاعية، التقارير"
+}

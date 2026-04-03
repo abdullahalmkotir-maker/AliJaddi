@@ -41,6 +41,7 @@ MODEL_COLORS = {
     "maps":               "#22C55E",
     "adich":              "#A855F7",
     "sniper":             "#EF4444",
+    "dental_assistant":   "#0D9488",
 }
 
 

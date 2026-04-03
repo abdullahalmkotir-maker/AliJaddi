@@ -32,6 +32,12 @@
       "version": "0.1.0-beta",
       "min_platform": "0.3.0",
       "manifest": "manifests/sniper_perspective.json"
+    },
+    {
+      "id": "dental_assistant",
+      "version": "1.0.0",
+      "min_platform": "0.3.0",
+      "manifest": "manifests/dental_assistant.json"
     }
   ]
 }
