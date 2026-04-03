@@ -161,7 +161,7 @@ _FALLBACK_ENTRIES: list[dict[str, Any]] = [
         "active": True,
         "version": "1.3.2",
         "size_mb": 50,
-        "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/dental_assistant.zip",
+        "download_url": "https://raw.githubusercontent.com/abdullahalmkotir-maker/AliJaddi/main/packaging/dental_assistant.zip",
         "category": "medical",
     },
 ]
