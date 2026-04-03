@@ -9,7 +9,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 def test_version_matches_beta():
     from alijaddi import __version__
 
-    assert __version__ == "0.2.0-beta"
+    assert __version__ == "0.4.0-beta"
 
 
 def test_local_registry_platform():
@@ -17,9 +17,17 @@ def test_local_registry_platform():
 
     reg = fetch_registry_local()
     assert reg is not None
-    assert reg.get("platform") == "0.2.0-beta"
+    assert reg.get("platform") == "0.4.0-beta"
     models = reg.get("models", [])
     assert len(models) >= 1
+
+
+def test_apps_paths_resolve():
+    from services.paths import bundle_root, primary_icon_path, apps_root
+
+    assert bundle_root().is_dir()
+    assert primary_icon_path().name.endswith(".png")
+    assert apps_root().name == "تطبيقات علي جدي"
 
 
 def test_main_window_constructible():

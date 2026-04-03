@@ -3,7 +3,7 @@
   "name": "مدير التواصل",
   "name_en": "Mudir Altawasul",
   "desc": "جدولة ونشر المحتوى على المنصات الاجتماعية",
-  "version": "0.2.0-beta",
+  "version": "0.2.1-beta",
   "author": "AliJaddi Team",
   "icon": "CAMPAIGN_ROUNDED",
   "color": "#06B6D4",
@@ -18,5 +18,5 @@
   "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/mudir.zip",
   "dependencies": ["requests", "schedule"],
   "screenshots": [],
-  "changelog": "0.2.0-beta: مواءمة منصة علي جدّي بيتا 0.2، تحسين التوافق مع مسارات سطح المكتب\n0.1.0: الإصدار الأول — جدولة ونشر المحتوى"
+  "changelog": "0.2.1-beta: مواءمة بيتا 0.2.1 (مثبت Windows، مسارات التثبيت، واجهة مرنة)\n0.2.0-beta: مواءمة منصة علي جدّي بيتا 0.2، تحسين التوافق مع مسارات سطح المكتب\n0.1.0: الإصدار الأول — جدولة ونشر المحتوى"
 }

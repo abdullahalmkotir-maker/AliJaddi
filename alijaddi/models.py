@@ -1,8 +1,6 @@
 """
-سجل النماذج الموحّد — يطابق:
-  - core.model_catalog في AliJaddi Cloud (هجرات Supabase)
-  - AVAILABLE_MODELS في AliJaddiAccount/config.py
-  - CANONICAL_MODEL_IDS في AliJaddi Cloud/python/integration/model_ids.py
+سجل النماذج — يُبنى من كتالوج manifests الموحّد (services.model_catalog)
+مع إدخالات سحابية ثابتة بلا مجلد محلي.
 """
 from __future__ import annotations
 
@@ -18,10 +16,11 @@ class ModelInfo(TypedDict):
     cloud_table: str
 
 
-MODEL_REGISTRY: Dict[str, ModelInfo] = {
+# إن فشل استيراد الكتالوج (بيئة ناقصة)
+_FALLBACK_REGISTRY: Dict[str, ModelInfo] = {
     "euqid": {
         "name": "عقد",
-        "description": "صياغة العقود وتحليل النصوص محلياً، مع اختيار مزامنة ملخص النشاط مع منصة علي جدّي",
+        "description": "صياغة العقود وتحليل النصوص محلياً",
         "icon": "📜",
         "project_folder": "Euqid",
         "launch_cmd": "python main.py",
@@ -29,15 +28,15 @@ MODEL_REGISTRY: Dict[str, ModelInfo] = {
     },
     "tahlil": {
         "name": "تحليل",
-        "description": "تحليل بيانات واستبيانات — tahlil",
+        "description": "تحليل بيانات واستبيانات",
         "icon": "📊",
-        "project_folder": "tahlil",
-        "launch_cmd": "python launcher.py",
+        "project_folder": "statistics",
+        "launch_cmd": "streamlit run app.py",
         "cloud_table": "model_user_data",
     },
     "zakhrafatan": {
         "name": "زخرفة",
-        "description": "Zakhrafatan — توليد وتصنيف الزخارف العربية بالذكاء الاصطناعي",
+        "description": "توليد وتصنيف الزخارف العربية",
         "icon": "🎨",
         "project_folder": "Zakhrafatan",
         "launch_cmd": "streamlit run main.py",
@@ -45,7 +44,7 @@ MODEL_REGISTRY: Dict[str, ModelInfo] = {
     },
     "sniper_perspective": {
         "name": "منظور القناص",
-        "description": "SniperPerspective — تتبع YOLO بكاميرا الويب",
+        "description": "تتبع YOLO",
         "icon": "🎯",
         "project_folder": "SniperPerspective_Project",
         "launch_cmd": "python SniperPerspective.py",
@@ -53,12 +52,15 @@ MODEL_REGISTRY: Dict[str, ModelInfo] = {
     },
     "mudir": {
         "name": "مدير التواصل",
-        "description": "Mudir Altawasul — جدولة ونشر على المنصات الاجتماعية",
+        "description": "جدولة ونشر",
         "icon": "📣",
         "project_folder": "Mudir Altawasul",
         "launch_cmd": "python run_desktop.py",
         "cloud_table": "social_post_queue",
     },
+}
+
+_CLOUD_ONLY: Dict[str, ModelInfo] = {
     "legal": {
         "name": "قانون",
         "description": "استعلامات قانونية وتحليل العقود",
@@ -94,6 +96,38 @@ MODEL_REGISTRY: Dict[str, ModelInfo] = {
 }
 
 
+def _build_registry() -> Dict[str, ModelInfo]:
+    try:
+        from services.model_catalog import load_raw_merged_entries, entries_to_launcher_registry
+        from services.paths import bundle_root
+
+        raw = load_raw_merged_entries(bundle_root())
+        conv = entries_to_launcher_registry(raw)
+        out: Dict[str, ModelInfo] = {}
+        for mid, row in conv.items():
+            out[mid] = ModelInfo(
+                name=row["name"],
+                description=row["description"],
+                icon=row["icon"],
+                project_folder=row["project_folder"],
+                launch_cmd=row["launch_cmd"],
+                cloud_table=row["cloud_table"],
+            )
+        for k, v in _CLOUD_ONLY.items():
+            if k not in out:
+                out[k] = v
+        return out
+    except Exception:
+        out = dict(_FALLBACK_REGISTRY)
+        for k, v in _CLOUD_ONLY.items():
+            if k not in out:
+                out[k] = v
+        return out
+
+
+MODEL_REGISTRY: Dict[str, ModelInfo] = _build_registry()
+
+
 def get_ai_models() -> Dict[str, ModelInfo]:
     """يرجع فقط النماذج التي لها مشروع فعلي على سطح المكتب."""
     return {k: v for k, v in MODEL_REGISTRY.items() if v["project_folder"]}
@@ -101,3 +135,9 @@ def get_ai_models() -> Dict[str, ModelInfo]:
 
 def get_model(model_id: str) -> Optional[ModelInfo]:
     return MODEL_REGISTRY.get(model_id)
+
+
+def refresh_registry() -> None:
+    """للاختبارات أو إعادة تحميل الكتالوج بعد تغيير الملفات (نادر)."""
+    global MODEL_REGISTRY
+    MODEL_REGISTRY = _build_registry()

@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QDateEdit, QComboBox,
 )
 from PySide6.QtCore import Qt, Signal, QTimer, QDate
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QGuiApplication
 
 from services.local_store import get_setting
 from ui.theme_qt import PRIMARY, DANGER, SUCCESS, ACCENT_CYAN
@@ -53,8 +53,14 @@ class LoginDialog(QDialog):
         self._locale = get_setting("language", "ar") or "ar"
 
         self.setWindowTitle("AliJaddi")
-        self.setMinimumWidth(460)
-        self.setMaximumWidth(520)
+        scr = QGuiApplication.primaryScreen()
+        if scr:
+            aw = scr.availableGeometry().width()
+            self.setMinimumWidth(max(280, min(440, aw - 32)))
+            self.setMaximumWidth(min(540, aw - 16))
+        else:
+            self.setMinimumWidth(440)
+            self.setMaximumWidth(520)
         self._apply_direction()
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 

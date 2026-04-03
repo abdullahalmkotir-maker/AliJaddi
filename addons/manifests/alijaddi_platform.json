@@ -1,0 +1,18 @@
+{
+  "id": "alijaddi_platform",
+  "name": "علي جدي — المنصّة",
+  "desc": "تطبيق سطح المكتب الرئيسي. بعد رفع تحديث إلى المستودع وتعريف رقم الإصدار في السجل، تُزامن المنصّة السجل تلقائياً ويظهر هنا زر التحديث عند توفر إصدار أحدث من المثبّت لديك.",
+  "icon": "APPS_ROUNDED",
+  "color": "#2563EB",
+  "folder": "AliJaddi",
+  "launch": "",
+  "rating": 5.0,
+  "users": 0,
+  "active": true,
+  "version": "0.4.0-beta",
+  "size_mb": 0,
+  "download_url": "",
+  "category": "platform",
+  "store_only": true,
+  "store_pin": true
+}

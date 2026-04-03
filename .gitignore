@@ -25,7 +25,7 @@ Thumbs.db
 .DS_Store
 desktop.ini
 
-# ═══ Flet build artifacts ═══
+# ═══ PyInstaller / مخرجات بناء ═══
 build/
 dist/
 
@@ -38,3 +38,8 @@ supabase/.temp/
 
 # ═══ حزم تنزيل قديمة — لا تُرفع إلى Git ═══
 تنزيل/**/*.zip
+تنزيل/windows/AliJaddi-Beta-*-Windows/
+تنزيل/windows/*Setup*.exe
+تنزيل/android/*.apk
+تنزيل/android/*.aab
+installer/*.exe

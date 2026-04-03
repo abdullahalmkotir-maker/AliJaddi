@@ -7,30 +7,27 @@ from PySide6.QtWidgets import QApplication
 
 from services.local_store import load_settings, set_setting
 
-# ─── Light palette ───
-L_BG = "#F5F7FA"
-L_HEADER = "#FFFFFF"
-L_CARD = "#FFFFFF"
-L_TEXT = "#1E293B"
-L_TEXT2 = "#64748B"
-L_BORDER = "#E2E8F0"
-
-# ─── Dark palette ───
-D_BG = "#121826"
-D_HEADER = "#1E293B"
-D_CARD = "#1E293B"
-D_TEXT = "#F1F5F9"
-D_TEXT2 = "#94A3B8"
-D_BORDER = "#334155"
-
-# ─── Brand / Accent ───
-PRIMARY = "#3B82F6"
-PRIMARY_D = "#2563EB"
-DANGER = "#EF4444"
-SUCCESS = "#22C55E"
-STAR = "#F59E0B"
-STAR_D = "#FBBF24"
-ACCENT_CYAN = "#06B6D4"
+from alijaddi.visual_identity import (
+    L_BG,
+    L_HEADER,
+    L_CARD,
+    L_TEXT,
+    L_TEXT2,
+    L_BORDER,
+    D_BG,
+    D_HEADER,
+    D_CARD,
+    D_TEXT,
+    D_TEXT2,
+    D_BORDER,
+    PRIMARY,
+    PRIMARY_D,
+    DANGER,
+    SUCCESS,
+    STAR,
+    STAR_D,
+    ACCENT_CYAN,
+)
 
 
 class ThemeManager:
@@ -173,6 +170,17 @@ class ThemeManager:
             QToolTip {{
                 background: {t.card}; color: {t.text};
                 border: 1px solid {t.border}; border-radius: 6px; padding: 4px 8px;
+            }}
+
+            /* Dock — لوحة تشغيل التطبيقات داخل المنصّة */
+            QDockWidget#hostedAppDock {{
+                color: {t.text};
+            }}
+            QDockWidget#hostedAppDock::title {{
+                background: {t.header};
+                padding: 10px 12px;
+                border-bottom: 1px solid {t.border};
+                font-weight: 600;
             }}
         """
 

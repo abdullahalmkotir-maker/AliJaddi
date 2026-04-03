@@ -10,9 +10,10 @@ from typing import Dict, List, Optional, Tuple
 from .config import PLATFORM_ROOT
 from .models import MODEL_REGISTRY, ModelInfo, get_ai_models
 
-
-def _desktop() -> Path:
-    return PLATFORM_ROOT.parent
+try:
+    from services.paths import app_dir as _app_dir
+except ImportError:
+    _app_dir = None
 
 
 def _has_cloud_sync(folder: Path, model_id: str) -> bool:
@@ -24,10 +25,15 @@ def _has_cloud_sync(folder: Path, model_id: str) -> bool:
 
 def discover_models() -> Dict[str, Tuple[ModelInfo, Path, bool]]:
     """يكتشف النماذج على سطح المكتب وما إذا كانت تتضمّن مزامنة علي جدي سحابة."""
-    desktop = _desktop()
     result: Dict[str, Tuple[ModelInfo, Path, bool]] = {}
     for model_id, info in get_ai_models().items():
-        folder = desktop / info["project_folder"]
+        pf = (info.get("project_folder") or "").strip()
+        if not pf:
+            continue
+        if _app_dir is not None:
+            folder = _app_dir(pf)
+        else:
+            folder = PLATFORM_ROOT.parent / pf
         if folder.is_dir():
             result[model_id] = (info, folder, _has_cloud_sync(folder, model_id))
     return result
@@ -38,7 +44,11 @@ def launch_model(model_id: str) -> Optional[subprocess.Popen]:
     info = MODEL_REGISTRY.get(model_id)
     if not info or not info["project_folder"]:
         return None
-    folder = _desktop() / info["project_folder"]
+    pf = (info.get("project_folder") or "").strip()
+    if _app_dir is not None:
+        folder = _app_dir(pf)
+    else:
+        folder = PLATFORM_ROOT.parent / pf
     if not folder.is_dir():
         return None
     cmd = info["launch_cmd"]

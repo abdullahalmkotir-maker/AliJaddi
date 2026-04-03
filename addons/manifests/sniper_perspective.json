@@ -3,7 +3,7 @@
   "name": "منظور القناص",
   "name_en": "Sniper Perspective",
   "desc": "تتبع الأهداف بـ YOLO وكاميرا الويب",
-  "version": "0.2.0-beta",
+  "version": "0.2.1-beta",
   "author": "AliJaddi Team",
   "icon": "TRACK_CHANGES_ROUNDED",
   "color": "#EF4444",
@@ -18,5 +18,5 @@
   "download_url": "",
   "dependencies": ["ultralytics", "opencv-python"],
   "screenshots": [],
-  "changelog": "0.2.0-beta: مواءمة منصة بيتا 0.2، جاهزية تجريبية محسّنة\n0.1.0-beta: نسخة تجريبية أولية"
+  "changelog": "0.2.1-beta: مواءمة بيتا 0.2.1 على مستوى المنصة\n0.2.0-beta: مواءمة منصة بيتا 0.2، جاهزية تجريبية محسّنة\n0.1.0-beta: نسخة تجريبية أولية"
 }

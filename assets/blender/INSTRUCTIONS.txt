@@ -25,6 +25,7 @@ AliJaddi — أيقونة Blender وهوية بصرية
 - طبّق المادة MAT_Gold على الشعار.
 - اضبط الموضع فوق ALI_ICON_PLATE؛ أخفِ أو احذف HINT_Text.
 - Render: 1024×1024 PNG. فعّل Film Transparent إن أردت أيقونة بدون خلفية.
+- احفظ المخرجات كـ:  AliJaddi/assets/branding/app_icon.png  (يستبدل الأيقونة في المنصّة والمثبّت)
 
 ضع صورتك المرجعية
 -----------------
