@@ -150,9 +150,13 @@ class LoginSheet(ft.BottomSheet):
 
     def _close(self):
         try:
-            self.pg.pop_dialog()
+            self.open = False
+            self.pg.update()
         except Exception:
-            pass
+            try:
+                self.pg.pop_dialog()
+            except Exception:
+                pass
 
     def _clear_msg(self):
         self.msg.value = ""

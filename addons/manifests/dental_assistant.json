@@ -3,7 +3,7 @@
   "name": "مساعد طبيب الأسنان",
   "name_en": "Dental Smart Assistant",
   "desc": "نظام متكامل لإدارة عيادة الأسنان — ملفات المرضى، الجلسات، الصور الشعاعية، التقارير",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Ahmed Al-Yassiri",
   "icon": "MEDICAL_SERVICES_ROUNDED",
   "color": "#0D9488",
@@ -18,5 +18,5 @@
   "download_url": "",
   "dependencies": ["streamlit", "pandas", "plotly", "Pillow", "openpyxl"],
   "screenshots": [],
-  "changelog": "1.0.0: الإصدار الأول — إدارة المرضى، الجلسات، الصور الشعاعية، التقارير"
+  "changelog": "1.1.0: نظام مواعيد + مخطط أسنان + خطط علاج + مختبر + نسخ احتياطي + وضع ليلي\n1.0.0: الإصدار الأول — إدارة المرضى، الجلسات، الصور الشعاعية، التقارير"
 }

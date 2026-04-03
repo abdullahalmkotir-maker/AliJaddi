@@ -66,7 +66,9 @@ def build_profile_content(page: ft.Page, auth, on_login_done: Callable, on_logou
         def _open_login(_):
             from views.login_view import LoginSheet
             sheet = LoginSheet(page, auth, on_login_done)
-            page.show_dialog(sheet)
+            page.overlay.append(sheet)
+            sheet.open = True
+            page.update()
 
         auth_btn = ft.Container(
             content=ft.Row([

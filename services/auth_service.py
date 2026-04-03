@@ -18,6 +18,7 @@ from services.local_store import (
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://mfhtnfxdfpelrgzonxov.supabase.co").rstrip("/")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 _MAX_RETRIES = 3
 _TIMEOUT = 15
@@ -108,6 +109,19 @@ class AuthService:
         if not (self._key or "").strip():
             return False, _MISSING_KEY_MSG
 
+        # Strategy: create a pre-confirmed user via admin API, then sign in
+        if SUPABASE_SERVICE_KEY:
+            try:
+                ok, msg = self._admin_create_user(email, password)
+                if ok:
+                    return self.sign_in(email, password)
+                if "already been registered" in msg.lower() or "already_exists" in msg.lower():
+                    return False, "هذا البريد مسجّل مسبقاً — جرّب تسجيل الدخول"
+                return False, msg
+            except Exception:
+                pass
+
+        # Fallback: normal signup (requires email confirmation)
         def _do():
             return httpx.post(
                 f"{self._url}/auth/v1/signup",
@@ -118,14 +132,33 @@ class AuthService:
         try:
             r = _retry_request(_do)
             if r.status_code in (200, 201):
-                self._apply(r.json())
-                self._persist()
-                self.offline_mode = False
-                return True, "تم إنشاء الحساب بنجاح"
+                body = r.json()
+                if body.get("access_token"):
+                    self._apply(body)
+                    self._persist()
+                    self.offline_mode = False
+                    return True, "تم إنشاء الحساب بنجاح"
+                return True, "تم إنشاء الحساب — تحقّق من بريدك لتأكيد الحساب ثم سجّل الدخول"
             return False, _safe_error(r)
         except Exception:
             self.offline_mode = True
             return False, "لا يوجد اتصال — جرّب لاحقاً"
+
+    def _admin_create_user(self, email: str, password: str) -> tuple[bool, str]:
+        """Create a pre-confirmed user via service role key."""
+        r = httpx.post(
+            f"{self._url}/auth/v1/admin/users",
+            headers={
+                "apikey": SUPABASE_SERVICE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={"email": email, "password": password, "email_confirm": True},
+            timeout=_TIMEOUT,
+        )
+        if r.status_code in (200, 201):
+            return True, ""
+        return False, _safe_error(r)
 
     def sign_in(self, email: str, password: str) -> tuple[bool, str]:
         if not (self._key or "").strip():

@@ -33,14 +33,14 @@ def _desktop() -> Path:
 
 
 def _snack(page: ft.Page, text: str, color: str):
-    """SnackBar آمن — يعمل مع جميع إصدارات Flet."""
+    """SnackBar آمن — يعمل مع Flet 0.84+."""
     try:
-        page.show_dialog(ft.SnackBar(content=ft.Text(text), bgcolor=color))
+        sb = ft.SnackBar(content=ft.Text(text, color="#FFF"), bgcolor=color)
+        page.overlay.append(sb)
+        sb.open = True
+        page.update()
     except Exception:
-        try:
-            page.show_dialog(ft.SnackBar(content=ft.Text(text), bgcolor=color))
-        except Exception:
-            pass
+        pass
 
 
 def _recent_models(limit: int = 3):
@@ -154,7 +154,9 @@ class AppHeader(ft.Container):
                     padding=ft.padding.all(20),
                 )
             )
-            page.show_dialog(sheet)
+            page.overlay.append(sheet)
+            sheet.open = True
+            page.update()
 
         notif_stack = ft.Stack([
             ft.IconButton(icon=ft.Icons.NOTIFICATIONS_NONE_ROUNDED, icon_color=T.tx2(page), icon_size=22),
@@ -455,12 +457,18 @@ def _addons_content(page, on_install, on_uninstall, on_update):
     """متجر الإضافات — تثبيت/تحديث/حذف النماذج."""
     desktop = _desktop()
     installed = load_installed()
-    registry = get_registry()
+    try:
+        registry = get_registry()
+    except Exception:
+        registry = {"schema_version": 2, "models": []}
     reg_models = {e["id"]: e for e in registry.get("models", [])}
 
     total = len(MODELS)
     installed_count = sum(1 for m in MODELS if m.get("active") and (desktop / m["folder"]).is_dir())
-    updatable = sum(1 for m in MODELS if check_update(m["id"], registry) is not None)
+    try:
+        updatable = sum(1 for m in MODELS if check_update(m["id"], registry) is not None)
+    except Exception:
+        updatable = 0
 
     header = ft.Container(
         content=ft.Column([
@@ -511,7 +519,10 @@ def _addons_content(page, on_install, on_uninstall, on_update):
         exists = (desktop / m["folder"]).is_dir()
         model_installed = exists or is_installed(m["id"])
         local_ver = installed_version(m["id"]) or m.get("version", "")
-        new_ver = check_update(m["id"], registry)
+        try:
+            new_ver = check_update(m["id"], registry)
+        except Exception:
+            new_ver = None
         has_download = bool(m.get("download_url"))
         active = m.get("active", True)
 
@@ -721,8 +732,7 @@ class HomeView(ft.View):
         self._nav = NavTabs(page, 0, self._switch_tab)
 
         body = ft.Row([self.content_area, self.sidebar_area],
-                       expand=True, spacing=0, vertical_alignment=ft.CrossAxisAlignment.START,
-                       scroll=ft.ScrollMode.ADAPTIVE)
+                       expand=True, spacing=0, vertical_alignment=ft.CrossAxisAlignment.START)
 
         fab = ft.FloatingActionButton(
             icon=ft.Icons.ROCKET_LAUNCH_ROUNDED, bgcolor=T.primary(page),
@@ -999,13 +1009,40 @@ class HomeView(ft.View):
             self.sidebar_area.content = _sidebar(self.pg, self.auth)
             self.sidebar_area.visible = True
         elif idx == 1:
-            self.content_area.content = ft.Container(
-                content=_addons_content(
+            try:
+                addons_ui = _addons_content(
                     self.pg,
                     on_install=self._install_addon,
                     on_uninstall=self._uninstall_addon,
                     on_update=self._install_addon,
-                ),
+                )
+            except Exception as exc:
+                addons_ui = ft.Column([
+                    ft.Container(height=40),
+                    ft.Container(
+                        content=ft.Column([
+                            ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color=T.DANGER, size=48),
+                            ft.Text("تعذّر تحميل متجر الإضافات", size=18,
+                                    weight=ft.FontWeight.BOLD, color=T.tx(self.pg)),
+                            ft.Text(str(exc), size=12, color=T.tx2(self.pg),
+                                    text_align=ft.TextAlign.CENTER),
+                            ft.Container(height=10),
+                            ft.Container(
+                                content=ft.Text("إعادة المحاولة", color="#FFF", size=14,
+                                                weight=ft.FontWeight.W_600),
+                                bgcolor=T.primary(self.pg), border_radius=12,
+                                padding=ft.padding.symmetric(horizontal=20, vertical=10),
+                                on_click=lambda _: self._switch_tab(1), ink=True,
+                            ),
+                        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10),
+                        padding=ft.padding.all(30),
+                        bgcolor=T.card(self.pg), border_radius=20,
+                        border=ft.border.all(1, T.border(self.pg)),
+                        width=400,
+                    ),
+                ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True)
+            self.content_area.content = ft.Container(
+                content=addons_ui,
                 padding=ft.padding.symmetric(horizontal=0), expand=True,
             )
             self.sidebar_area.visible = False
@@ -1112,24 +1149,31 @@ class HomeView(ft.View):
                       on_progress=_on_progress, on_done=_on_done)
 
     def _uninstall_addon(self, model_id, folder):
+        dlg = ft.AlertDialog(
+            title=ft.Text("تأكيد الحذف", weight=ft.FontWeight.BOLD),
+            content=ft.Text(f"هل تريد حذف {folder} من جهازك؟\nيمكنك إعادة تثبيته لاحقاً من متجر الإضافات."),
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+
+        def _close_dlg(_=None):
+            dlg.open = False
+            self.pg.update()
+
         def _do_uninstall(_):
-            self.pg.pop_dialog()
+            _close_dlg()
             ok, msg = uninstall_model(model_id, folder)
             _snack(self.pg, msg, T.SUCCESS if ok else T.DANGER)
             self._build_tab(self._tab)
             self.pg.update()
 
-        dlg = ft.AlertDialog(
-            title=ft.Text("تأكيد الحذف", weight=ft.FontWeight.BOLD),
-            content=ft.Text(f"هل تريد حذف {folder} من جهازك؟\nيمكنك إعادة تثبيته لاحقاً من متجر الإضافات."),
-            actions=[
-                ft.TextButton("إلغاء", on_click=lambda _: self.pg.pop_dialog()),
-                ft.TextButton("حذف", on_click=_do_uninstall,
-                              style=ft.ButtonStyle(color=T.DANGER)),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        self.pg.show_dialog(dlg)
+        dlg.actions = [
+            ft.TextButton("إلغاء", on_click=_close_dlg),
+            ft.TextButton("حذف", on_click=_do_uninstall,
+                          style=ft.ButtonStyle(color=T.DANGER)),
+        ]
+        self.pg.overlay.append(dlg)
+        dlg.open = True
+        self.pg.update()
 
     def _dismiss_onboarding(self):
         set_setting("onboarding_dismissed", True)
@@ -1143,19 +1187,28 @@ class HomeView(ft.View):
         def close_bs(_):
             self.pg.pop_dialog()
 
-        bs = ft.BottomSheet(content=ft.Container(
-            content=ft.Column([
-                ft.Text("إجراءات سريعة", size=18, weight=ft.FontWeight.BOLD, color=T.tx(self.pg)),
-                ft.Divider(color=T.border(self.pg)),
-                ft.ListTile(leading=ft.Icon(ft.Icons.PLAY_ARROW_ROUNDED, color=T.SUCCESS),
-                            title=ft.Text(f"تشغيل: {last_name}"),
-                            on_click=lambda _: (self.pg.pop_dialog(), self._launch(last) if last else None)),
-                ft.ListTile(leading=ft.Icon(ft.Icons.STOREFRONT_ROUNDED, color=T.PRIMARY),
-                            title=ft.Text("المتجر"),
-                            on_click=lambda _: (self.pg.pop_dialog(), self._switch_tab(1))),
-                ft.ListTile(leading=ft.Icon(ft.Icons.PERSON_ROUNDED, color=T.ACCENT_CYAN),
-                            title=ft.Text("الملف الشخصي"),
-                            on_click=lambda _: (self.pg.pop_dialog(), self._show_profile())),
-            ], spacing=6, tight=True), padding=ft.padding.all(20),
-        ))
-        self.pg.show_dialog(bs)
+        bs = ft.BottomSheet(
+            content=ft.Container(
+                content=ft.Column([
+                    ft.Text("إجراءات سريعة", size=18, weight=ft.FontWeight.BOLD, color=T.tx(self.pg)),
+                    ft.Divider(color=T.border(self.pg)),
+                    ft.ListTile(leading=ft.Icon(ft.Icons.PLAY_ARROW_ROUNDED, color=T.SUCCESS),
+                                title=ft.Text(f"تشغيل: {last_name}"),
+                                on_click=lambda _: (_close_bs(), self._launch(last) if last else None)),
+                    ft.ListTile(leading=ft.Icon(ft.Icons.STOREFRONT_ROUNDED, color=T.PRIMARY),
+                                title=ft.Text("المتجر"),
+                                on_click=lambda _: (_close_bs(), self._switch_tab(1))),
+                    ft.ListTile(leading=ft.Icon(ft.Icons.PERSON_ROUNDED, color=T.ACCENT_CYAN),
+                                title=ft.Text("الملف الشخصي"),
+                                on_click=lambda _: (_close_bs(), self._show_profile())),
+                ], spacing=6, tight=True), padding=ft.padding.all(20),
+            ),
+        )
+
+        def _close_bs():
+            bs.open = False
+            self.pg.update()
+
+        self.pg.overlay.append(bs)
+        bs.open = True
+        self.pg.update()
