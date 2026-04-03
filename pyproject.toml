@@ -1,0 +1,18 @@
+[project]
+name = "AliJaddi"
+version = "0.3.0"
+description = "AliJaddi — منصة نماذج الذكاء الاصطناعي"
+requires-python = ">=3.10"
+dependencies = [
+    "flet>=0.84.0",
+    "httpx>=0.28.0",
+    "requests>=2.28.0",
+]
+
+[tool.flet]
+app.path = "main.py"
+app.assets_dir = "assets"
+app.name = "AliJaddi"
+app.product = "AliJaddi"
+app.org = "com.alijaddi"
+app.description = "منصة نماذج الذكاء الاصطناعي — علي جدّي"

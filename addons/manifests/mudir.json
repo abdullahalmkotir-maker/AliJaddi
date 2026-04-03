@@ -1,0 +1,22 @@
+{
+  "id": "mudir",
+  "name": "مدير التواصل",
+  "name_en": "Mudir Altawasul",
+  "desc": "جدولة ونشر المحتوى على المنصات الاجتماعية",
+  "version": "1.0.0",
+  "author": "AliJaddi Team",
+  "icon": "CAMPAIGN_ROUNDED",
+  "color": "#06B6D4",
+  "category": "social-media",
+  "tags": ["تواصل", "نشر", "جدولة", "سوشيال ميديا"],
+  "folder": "Mudir Altawasul",
+  "launch": "python run_desktop.py",
+  "size_mb": 35,
+  "rating": 4.6,
+  "users": 73,
+  "active": true,
+  "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/mudir.zip",
+  "dependencies": ["requests", "schedule"],
+  "screenshots": [],
+  "changelog": "1.0.0: الإصدار الأول — جدولة ونشر المحتوى"
+}

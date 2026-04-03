@@ -1,0 +1,22 @@
+{
+  "id": "euqid",
+  "name": "عقد",
+  "name_en": "Euqid",
+  "desc": "إدارة وتحليل العقود الذكية",
+  "version": "1.0.0",
+  "author": "AliJaddi Team",
+  "icon": "DESCRIPTION_ROUNDED",
+  "color": "#F97316",
+  "category": "productivity",
+  "tags": ["عقود", "تحليل", "ذكاء اصطناعي", "إدارة"],
+  "folder": "Euqid",
+  "launch": "python main.py",
+  "size_mb": 45,
+  "rating": 4.9,
+  "users": 208,
+  "active": true,
+  "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/euqid.zip",
+  "dependencies": ["flet"],
+  "screenshots": [],
+  "changelog": "1.0.0: الإصدار الأول — إدارة وتحليل العقود"
+}

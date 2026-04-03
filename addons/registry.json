@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "updated_at": "2026-04-03",
+  "repo": "abdullahalmkotir-maker/AliJaddi",
+  "models": [
+    {
+      "id": "zakhrafatan",
+      "version": "1.0.0",
+      "min_platform": "0.3.0",
+      "manifest": "manifests/zakhrafatan.json"
+    },
+    {
+      "id": "euqid",
+      "version": "1.0.0",
+      "min_platform": "0.3.0",
+      "manifest": "manifests/euqid.json"
+    },
+    {
+      "id": "tahlil",
+      "version": "1.0.0",
+      "min_platform": "0.3.0",
+      "manifest": "manifests/tahlil.json"
+    },
+    {
+      "id": "mudir",
+      "version": "1.0.0",
+      "min_platform": "0.3.0",
+      "manifest": "manifests/mudir.json"
+    },
+    {
+      "id": "sniper_perspective",
+      "version": "0.1.0-beta",
+      "min_platform": "0.3.0",
+      "manifest": "manifests/sniper_perspective.json"
+    }
+  ]
+}

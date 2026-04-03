@@ -1,0 +1,22 @@
+{
+  "id": "zakhrafatan",
+  "name": "زخرفة",
+  "name_en": "Zakhrafatan",
+  "desc": "توليد وتصنيف الزخارف العربية بالذكاء الاصطناعي",
+  "version": "1.0.0",
+  "author": "AliJaddi Team",
+  "icon": "PALETTE_ROUNDED",
+  "color": "#8B5CF6",
+  "category": "ai-art",
+  "tags": ["زخرفة", "ذكاء اصطناعي", "فن", "تصنيف"],
+  "folder": "Zakhrafatan",
+  "launch": "streamlit run main.py",
+  "size_mb": 85,
+  "rating": 4.8,
+  "users": 142,
+  "active": true,
+  "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/zakhrafatan.zip",
+  "dependencies": ["streamlit", "tensorflow", "pillow"],
+  "screenshots": [],
+  "changelog": "1.0.0: الإصدار الأول — توليد وتصنيف الزخارف"
+}

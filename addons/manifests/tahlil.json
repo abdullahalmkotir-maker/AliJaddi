@@ -1,0 +1,22 @@
+{
+  "id": "tahlil",
+  "name": "تحليل",
+  "name_en": "Tahlil",
+  "desc": "تحليل بيانات واستبيانات ذكي",
+  "version": "1.0.0",
+  "author": "AliJaddi Team",
+  "icon": "ANALYTICS_ROUNDED",
+  "color": "#3B82F6",
+  "category": "data-analysis",
+  "tags": ["تحليل", "بيانات", "استبيانات", "إحصاء"],
+  "folder": "tahlil",
+  "launch": "python launcher.py",
+  "size_mb": 60,
+  "rating": 4.7,
+  "users": 95,
+  "active": true,
+  "download_url": "https://github.com/abdullahalmkotir-maker/AliJaddi/releases/download/models-v1.0/tahlil.zip",
+  "dependencies": ["pandas", "plotly"],
+  "screenshots": [],
+  "changelog": "1.0.0: الإصدار الأول — تحليل بيانات واستبيانات"
+}

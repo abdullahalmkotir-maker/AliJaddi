@@ -1,0 +1,34 @@
+# ═══ Python ═══
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.spec
+
+# ═══ Environment ═══
+.env
+.venv/
+env/
+venv/
+
+# ═══ IDE ═══
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+
+# ═══ OS ═══
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ═══ Flet build artifacts ═══
+build/
+dist/
+
+# ═══ Local data (لا ترفع بيانات المستخدم) ═══
+*.db
+*.sqlite

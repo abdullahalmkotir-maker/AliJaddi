@@ -1,0 +1,22 @@
+{
+  "id": "sniper_perspective",
+  "name": "منظور القناص",
+  "name_en": "Sniper Perspective",
+  "desc": "تتبع الأهداف بـ YOLO وكاميرا الويب",
+  "version": "0.1.0-beta",
+  "author": "AliJaddi Team",
+  "icon": "TRACK_CHANGES_ROUNDED",
+  "color": "#EF4444",
+  "category": "computer-vision",
+  "tags": ["YOLO", "تتبع", "كاميرا", "رؤية حاسوبية"],
+  "folder": "SniperPerspective_Project",
+  "launch": "python SniperPerspective.py",
+  "size_mb": 120,
+  "rating": 0,
+  "users": 0,
+  "active": false,
+  "download_url": "",
+  "dependencies": ["ultralytics", "opencv-python"],
+  "screenshots": [],
+  "changelog": "0.1.0-beta: نسخة تجريبية أولية"
+}
