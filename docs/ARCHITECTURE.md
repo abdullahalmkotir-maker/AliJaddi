@@ -45,6 +45,12 @@ flowchart TB
 - `scripts/build_windows_release.ps1` — PyInstaller + PySide6.
 - الحزمة: `تنزيل/windows/AliJaddi-Beta-0.2-Windows.zip` (مستثناة من Git).
 
+## GitHub (تجاري / خاص)
+
+- ثبّت **GitHub CLI**: `winget install GitHub.cli`
+- سجّل الدخول: `"$env:ProgramFiles\GitHub CLI\gh.exe" auth login`
+- سكربت مساعد: **`scripts/github_commercial.ps1`** (`-Action help` للمساعدة؛ `create-cloud` / `create-account` لإنشاء مستودعات **private**)
+
 ---
 
 © 2026 AliJaddi — بيتا 0.2
