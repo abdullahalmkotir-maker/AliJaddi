@@ -9,7 +9,7 @@ flowchart TB
   subgraph desktop [سطح المكتب]
     AJ[AliJaddi\nPySide6 main_qt.py]
     ACC[AliJaddiAccount\nalijaddi_platform]
-    APPS[تطبيقات علي جدي\nZakhrafatan / Euqid / tahlil / ...]
+    APPS[مدير تنزيلات\n~/.alijaddi/downloads\nZakhrafatan / Euqid / …]
   end
 
   subgraph cloud [Supabase]
@@ -33,12 +33,13 @@ flowchart TB
 | المنصّة | `AliJaddi/` — `main_qt.py`, `ui/`, `services/` | واجهة Qt، متجر النماذج، `addon_manager`، مصادقة |
 | السحابة | `AliJaddi Cloud/` — `python/integration/` | أدوات مساعدة، ضغط، REST؛ الهجرات في `AliJaddi/supabase/migrations/` |
 | الحساب | `AliJaddiAccount/` — `alijaddi_platform/desktop/launcher.py` | يُستدعى من `AliJaddi/launch.py` عند التشغيل بدون وسيطات |
-| نموذج على سطح المكتب | `تطبيقات علي جدي/<Model>/alijaddi_cloud_sync.py` | رفع/جلب `payload` عبر `rest/v1/model_user_data` |
+| نموذج مُدار من المنصّة | `~/.alijaddi/downloads/<Model>/` (+ توافق مع مسار سطح المكتب القديم) | رفع/جلب `payload` عبر `rest/v1/model_user_data` |
 
 ## متغيرات بيئة مشتركة
 
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY` — نفس المشروع لجميع العملاء (انظر `.env.example`).
 - JWT المستخدم يُمرَّر أحياناً كـ `ALIJADDI_JWT` من المنصّة عند تشغيل نموذج خارجي.
+- `ALIJADDI_APPS_ROOT` — اختياري: يستبدل جذر مدير التنزيلات الافتراضي (`~/.alijaddi/downloads`) لمجلدات تطبيقات المتجر.
 
 ## بناء التوزيع (Windows)
 
@@ -48,7 +49,7 @@ flowchart TB
 
 ## رؤية المنصّة (متجر + تشغيل + Ali12 للتثبيت)
 
-**متجر علي جدّي** يعرض الكتالوج، الإصدارات، والتحديثات بعد مزامنة `registry.json`؛ **لا يُنزَّل ولا يُثبَّت** النموذج من داخل واجهة Qt. التثبيت والتحديث والإزالة على سطح المكتب يتم عبر **Ali12** — سطر الأوامر `scripts/ali12_store_install.py` (معيار `store_consent_v2`، حاضنة «تطبيقات علي جدي»). المنصّة تشغّل التطبيقات **المثبّتة مسبقاً** وتعرض لوحة التشغيل.
+**متجر علي جدّي** يعرض الكتالوج، الإصدارات، والتحديثات بعد مزامنة `registry.json`؛ **لا يُنزَّل ولا يُثبَّت** النموذج من داخل واجهة Qt. علي جدّي **مدير تنزيلات وتشغيل**: التثبيت والتحديث والإزالة عبر **Ali12** — `scripts/ali12_store_install.py` (معيار `store_consent_v2`، الافتراضي `~/.alijaddi/downloads`). المنصّة تشغّل التطبيقات **المثبّتة مسبقاً** وتعرض لوحة التشغيل.
 
 **Ali12** يفسّر أخطاء التثبيت والتشغيل (قواعد + إشارات + `training/Ali12_seed.jsonl`) ويُكمّل مسار CLI أعلاه.
 
@@ -84,7 +85,7 @@ flowchart LR
 - **المعرّف الثابت:** `Ali12` (`ALI12_ASSISTANT_ID` في `Ali12.py` و`alijaddi.__init__`).
 - **السلوك الحالي:** اقتراحات عربية فورية من قواعد (`suggest_after_install_failure`, `resolve_ali12`)؛ فشل **تشغيل** من `HostedAppDock` يسجّل `launch_fail` مع نص Ali12. أحداث تثبيت CLI تُسجَّل عبر `install_model`/`install_telemetry` كسابق.
 - **السحابة:** عمود `assistant_model` (افتراضي `Ali12`) بعد هجرة `20260412120000_*`؛ راجع `AliJaddi Cloud/python/integration/ali12_export_format.py`.
-- **معيار تثبيت المتجر (`store_consent_v2`):** التنفيذ الموصى به — `python scripts/ali12_store_install.py install <model_id>` (حاضنة «تطبيقات علي جدي» أو `--parent`). الوصف والعقد في `services/store_install_standard.py`. الحقل `store_install_contract` في `addons/registry.json`. التحديثات تظهر في المتجر بعد المزامنة؛ إعادة `install` نفس المعرف تستبدل المجلد. `check_update` يقارن الإصدارات رقمياً.
+- **معيار تثبيت المتجر (`store_consent_v2`):** التنفيذ الموصى به — `python scripts/ali12_store_install.py install <model_id>` (افتراضي `~/.alijaddi/downloads` أو `--parent`). الوصف والعقد في `services/store_install_standard.py`. الحقل `store_install_contract` في `addons/registry.json`. التحديثات تظهر في المتجر بعد المزامنة؛ إعادة `install` نفس المعرف تستبدل المجلد. `check_update` يقارن الإصدارات رقمياً.
 - **بطاقة المنصّة في المتجر (`alijaddi_platform`):** `services/platform_store.py` + `addons/manifests/alijaddi_platform.json` — تُخفى من تبويب «تطبيقاتي» (`store_only`). يُستنتج التحديث من **`platform`** في `registry.json` مقابل `alijaddi.__version__`؛ زر التحديث يفتح إصدارات GitHub (Inno/ZIP). عند الإصدار: رفع `registry.json` مع رفع **`platform`** ونسخة السطر في `models` لنفس المعرّف.
 - **تصدير محلي للتدريب:** `python scripts/export_ali12_training_jsonl.py --only-failures -o train.jsonl`، ولبذور جاهزة: `--with-ali12-seed` أو `--with-all-seeds` (`training/Ali12_seed.jsonl` الموحّد).
 - **الحساب:** ثابت `ALI12_INSTALL_ASSISTANT_ID` في `AliJaddiAccount/config.py` للتوحيد عبر المستودعات.

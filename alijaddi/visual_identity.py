@@ -1,5 +1,5 @@
 """
-ألوان وهوية AliJaddi — مصدر واحد للمنصّة (theme_qt) ولتطبيقات PySide6 المشغّلة من الحاضنة.
+ألوان وهوية AliJaddi — مصدر واحد للمنصّة (theme_qt) ولتطبيقات PySide6 المشغّلة من مدير التنزيلات.
 """
 from __future__ import annotations
 

@@ -13,7 +13,7 @@
 متغيرات البيئة التي تضبطها المنصّة:
     ALIJADDI_PLATFORM_HOST=1
     ALIJADDI_THEME=dark|light
-    ALIJADDI_APPS_ROOT=...
+    ALIJADDI_APPS_ROOT=...  # جذر تنزيلات تطبيقات المتجر (افتراضي: .alijaddi/downloads)
 """
 from __future__ import annotations
 

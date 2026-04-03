@@ -117,7 +117,7 @@ def mark_uninstalled(model_id: str):
 
 
 def installed_app_path(model_id: str, folder: str) -> Path:
-    """مسار التطبيق المثبّت: `apps_parent` من السجل إن وُجد، وإلا الحاضنة الافتراضية."""
+    """مسار التطبيق المثبّت: `apps_parent` من السجل إن وُجد، وإلا جذر مدير التنزيلات الافتراضي."""
     row = load_installed().get(model_id) or {}
     parent = (row.get("apps_parent") or "").strip()
     name = (folder or "").strip()

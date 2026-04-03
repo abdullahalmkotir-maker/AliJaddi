@@ -62,7 +62,7 @@ class HostedAppDock(QDockWidget):
         lay.addWidget(self._title)
 
         self._hint_lbl = QLabel(
-            "المجلد: «تطبيقات علي جدي» على سطح المكتب — راجع السجل للأخطاء؛ "
+            "مجلد التطبيق: مدير تنزيلات علي جدّي (.alijaddi/downloads) أو مسار قديم على سطح المكتب — راجع السجل؛ "
             "Streamlit: «فتح الواجهة» عند ظهور الرابط. أعطال التشغيل تُغذّي تدريب Ali12."
         )
         self._hint_lbl.setWordWrap(True)

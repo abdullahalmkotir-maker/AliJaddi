@@ -2,7 +2,7 @@
   "id": "dental_assistant",
   "name": "مساعد طبيب الأسنان",
   "name_en": "Dental Smart Assistant",
-  "desc": "نظام متكامل لإدارة عيادة الأسنان — تجربة نسخة تجريبية مع 198 مستخدم زائر؛ تكامل AliJaddi Cloud وAliJaddiAccount؛ JWT عبر ALIJADDI_SUPABASE_ACCESS_TOKEN؛ store_consent_v2 وتغذية Ali12",
+  "desc": "نظام متكامل لإدارة عيادة الأسنان — تجربة مع 198 مستخدم زائر؛ تكامل REST مع AliJaddi Cloud (model_user_data) وAliJaddiAccount؛ JWT عبر ALIJADDI_SUPABASE_ACCESS_TOKEN؛ Ali12 وstore_consent_v2",
   "version": "1.3.2",
   "author": "Ahmed Falah (أحمد فلاح)",
   "icon": "MEDICAL_SERVICES_ROUNDED",
@@ -18,5 +18,5 @@
   "download_url": "https://raw.githubusercontent.com/abdullahalmkotir-maker/AliJaddi/main/packaging/dental_assistant.zip",
   "dependencies": ["streamlit", "pandas", "plotly", "Pillow", "openpyxl", "requests", "python-dotenv"],
   "screenshots": [],
-  "changelog": "1.3.2: رابط تحميل من packaging على main (raw.githubusercontent)؛ يمكن لاحقاً إرفاق نفس الملف على models-v1.0؛ تحقق Streamlit؛ توافق منصّة 0.4.1\n1.3.1: اسم المطوّر أحمد فلاح؛ مجلد التثبيت AhmadFalahDentalAssistant؛ رابط تحميل GitHub (نفس إصدار النماذج models-v1.0)؛ وصف متوافق مع Ali12 وstore_consent_v2\n1.3.0: إعادة بناء طبقة المزامنة (platform_sync) — مواءمة مع alijaddi/supabase_client وAliJaddi Cloud integration وcloud_client؛ حمولة payload_schema v2؛ schema_version جدول 2؛ تحميل .env من المشروع وAliJaddi وAliJaddiAccount؛ JWT من البيئة للمشغّل؛ مسارات ALIJADDI_CLOUD_ROOT / ALIJADDI_ACCOUNT_ROOT / ALIJADDI_PLATFORM_ROOT\n1.2.0: تكامل منصة علي جدّي — JWT، model_user_data، النجوم، جلسة محلية\n1.1.0: مواعيد + مخطط أسنان + خطط علاج + مختبر + نسخ احتياطي + وضع ليلي\n1.0.0: الإصدار الأول"
+  "changelog": "1.3.2: مجلد التثبيت AhmadFalahDentalAssistant؛ مدير تنزيلات .alijaddi/downloads؛ رابط حزمة من packaging على main\n1.3.0: إعادة بناء طبقة المزامنة (platform_sync)\n1.2.0: تكامل منصّة علي جدّي\n1.1.0: مواعيد + مخطط أسنان + خطط علاج + مختبر + نسخ احتياطي + وضع ليلي\n1.0.0: الإصدار الأول"
 }

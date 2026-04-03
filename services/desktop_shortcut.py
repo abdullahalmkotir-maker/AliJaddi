@@ -1,5 +1,5 @@
 """
-اختصارات سطح المكتب (ويندوز) لمجلدات التطبيقات المثبّتة داخل «تطبيقات علي جدي».
+اختصارات سطح المكتب (ويندوز) لمجلدات التطبيقات التي يديرها **مدير تنزيلات** علي جدّي.
 يُظهر للمستخدم أيقونة باسم عربي (مثل «عقد») بينما المجلد الفعلي قد يكون Latin (Euqid).
 """
 from __future__ import annotations
@@ -9,7 +9,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from services.paths import apps_root
+from services.paths import user_desktop_dir
 
 _INVALID_WIN = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
@@ -22,7 +22,7 @@ def _sanitize_shortcut_base(name: str) -> str:
 
 def create_hosted_app_desktop_shortcut(display_name: str, installed_folder: Path) -> Path | None:
     """
-    ينشئ ملف .lnk على مجلد سطح المكتب نفسه الذي يحتوي «تطبيقات علي جدي».
+    ينشئ ملف .lnk على سطح المكتب (OneDrive Desktop أو Desktop).
     الهدف: فتح مجلد التطبيق في مستكشف الملفات.
     """
     if os.name != "nt":
@@ -30,8 +30,8 @@ def create_hosted_app_desktop_shortcut(display_name: str, installed_folder: Path
     folder = Path(installed_folder)
     if not folder.is_dir():
         return None
-    desktop = apps_root().parent
-    if not desktop.is_dir():
+    desktop = user_desktop_dir()
+    if desktop is None or not desktop.is_dir():
         return None
     base = _sanitize_shortcut_base(display_name)
     lnk = desktop / f"{base}.lnk"

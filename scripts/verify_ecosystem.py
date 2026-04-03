@@ -26,12 +26,23 @@ def _desktop_dirs() -> list[Path]:
     return out
 
 
-def _apps_host() -> Path | None:
+def _store_download_bases() -> list[Path]:
+    """جذر مدير التنزيلات (.alijaddi/downloads) + الحاضنة القديمة على سطح المكتب إن وُجدت."""
+    out: list[Path] = []
+    try:
+        from services.paths import apps_root
+
+        out.append(apps_root().resolve())
+    except Exception:
+        pass
     for d in _desktop_dirs():
-        p = d / "تطبيقات علي جدي"
-        if p.is_dir():
-            return p
-    return None
+        legacy = d / "تطبيقات علي جدي"
+        if legacy.is_dir():
+            try:
+                out.append(legacy.resolve())
+            except OSError:
+                out.append(legacy)
+    return out
 
 
 def _pytest(root: Path, extra: list[str]) -> int:
@@ -80,13 +91,12 @@ def main(argv: list[str] | None = None) -> int:
         add_suite("AliJaddiAccount", d / "AliJaddiAccount")
         add_suite("AliJaddi Cloud (python)", d / "AliJaddi Cloud" / "python")
 
-    host = _apps_host()
-    if host:
+    for base in _store_download_bases():
         for sub, label in (
             ("Zakhrafatan", "Zakhrafatan"),
             ("Euqid", "Euqid"),
         ):
-            add_suite(label, host / sub)
+            add_suite(label, base / sub)
 
     failed: list[str] = []
     for label, root in suites:

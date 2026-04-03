@@ -2,7 +2,7 @@
 """
 Ali12 — مساعد تثبيت وتشخيص أعطال **للنماذج والإضافات والتطبيقات** الموزّعة عبر منصّة علي جدّي.
 
-**نطاق حالي (أقوى):** سطح المكتب — تثبيت تطبيقات المتجر عبر سطر الأوامر ``scripts/ali12_store_install.py`` (معيار ``store_consent_v2``، حاضنة «تطبيقات علي جدي»)، مثبّت المنصّة **Inno**، ZIP، تشغيل hosted، إزالة، وتفسير أخطاء التثبيت.
+**نطاق حالي (أقوى):** سطح المكتب — تثبيت المتجر عبر ``scripts/ali12_store_install.py`` (``store_consent_v2``، مدير تنزيلات ``~/.alijaddi/downloads``)، مثبّت المنصّة **Inno**، ZIP، تشغيل hosted، إزالة.
 **قيد التوسّع:** جوال / PWA / غلاف — نفس منطق التتبع وبذور ``training/Ali12_seed.jsonl`` تُوسَّع لاحقاً.
 
 محرّك **v2_weighted_jaccard:** قواعد مرجّحة + تداخل جاكارد (عربي/إنجليزي) + إشارات OS/مكدس؛ مخرجات جاهزة لـ JSONL دون تبعيات ثقيلة.
@@ -374,37 +374,6 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
         )
         return 8.0 + bonus + 14.0 * j
 
-    def sc_dental_assistant_streamlit_stack(ctx: Ali12Context) -> float:
-        mid = str(ctx.detail.get("model_id", "") or "").lower()
-        fol = str(ctx.detail.get("folder", "") or "").lower()
-        legacy = "ahmadfalahdentalassistant" in fol or (
-            "smart assistant" in fol and "yassiri" in fol
-        )
-        if mid != "dental_assistant" and not legacy:
-            return 0.0
-        t = ctx.combined_text.lower()
-        bonus = 0.0
-        for needle in (
-            "streamlit",
-            "modulenotfound",
-            "no module named",
-            "pandas",
-            "plotly",
-            "openpyxl",
-            "pillow",
-            "badzipfile",
-            "file is not a zip",
-            "connection refused",
-            "8501",
-        ):
-            if needle in t:
-                bonus += 4.0
-        j = jaccard_keywords(
-            ctx.combined_text,
-            frozenset({"streamlit", "module", "python", "pip", "requirements", "venv", "zip", "main.py"}),
-        )
-        return 8.0 + bonus + 14.0 * j
-
     def sc_uninstall(ctx: Ali12Context) -> float:
         return 100.0 if ctx.event_kind == "uninstall_fail" else 0.0
 
@@ -448,24 +417,24 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
             "install_no_url",
             sc_no_url,
             "لا يوجد رابط تحميل في السجل لهذا التطبيق. جرّب «تحديث السجل» أو انتظر رفع الإصدار على GitHub، "
-            "أو ثبّت المجلد يدوياً داخل «تطبيقات علي جدي» كما في الوثائق.",
+            "أو انسخ المجلد يدوياً تحت مدير التنزيلات (.alijaddi/downloads) كما في الوثائق.",
         ),
         _rule(
             "store_install_folder",
             sc_store_install_flow,
-            "**متجر المنصّة (نماذج/إضافات/تطبيقات):** موافقة ثم **تثبيت تلقائي** في «تطبيقات علي جدي» (`store_consent_v2`) أو «اختيار مجلد آخر». إن ألغيت، أعد «تنزيل وتثبيت». SmartScreen/مضاد فيروس: اسمح بالكتابة في المجلد.",
+            "**متجر المنصّة:** التثبيت عبر **Ali12** — `python scripts/ali12_store_install.py install <model_id>` (`store_consent_v2`)؛ الافتراضي `.alijaddi/downloads` أو `--parent`. SmartScreen/مضاد فيروس: اسمح بالكتابة في المجلد.",
         ),
         _rule(
             "post_install_ux",
             sc_post_install_ux,
-            "**بعد التثبيت من المتجر:** الملفات في مجلد التطبيق تحت الحاضنة التي اخترتها (غالباً «تطبيقات علي جدي»). شغّل من «فتح التطبيق» في المنصّة أو من الاختصار إن وُجد.",
+            "**بعد التثبيت:** الملفات في مجلد التطبيق تحت مدير التنزيلات أو المسار الذي اخترته. شغّل من «فتح التطبيق» في المنصّة أو من اختصار سطح المكتب إن وُجد.",
         ),
         _rule(
             "platform_alijaddi_install",
             sc_platform_alijaddi_install,
             "**منصّة ويندوز — معيار تطبيقات النظام:** `…-Setup.exe` من `تنزيل\\\\windows` → **Program Files** + قائمة ابدأ + إزالة من «التطبيقات». **مكمّل:** `…-Windows.zip` + `AliJaddi.exe`. "
             "UAC: وافق لـ Program Files. **بناء Setup:** Inno 6 (`ISCC` غالباً تحت `%LocalAppData%\\\\Programs\\\\Inno Setup 6` بعد winget)؛ `ALIJADDI_SKIP_INNO=1` للـZIP فقط. "
-            "صامت: `/VERYSILENT /SUPPRESSMSGBOXES`. داخل المنصّة: متجر **علي جدي** — موافقة ثم تثبيت تلقائي أو مجلد مخصّص؛ التحديثات من سجل المتجر.",
+            "صامت: `/VERYSILENT /SUPPRESSMSGBOXES`. تطبيقات المتجر: **Ali12 CLI** + مجلد التنزيلات الافتراضي؛ التحديثات من سجل المتجر.",
         ),
         _rule(
             "http_404",
@@ -515,7 +484,7 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
         _rule(
             "extract_phase",
             sc_extract,
-            "فشل فك الضغط أو النسخ. تأكد من وجود مساحة كافية ومسار حاضنة صالح (مجلد «تطبيقات علي جدي» الافتراضي).",
+            "فشل فك الضغط أو النسخ. تأكد من وجود مساحة كافية ومسار مدير التنزيلات صالح (.alijaddi/downloads أو ALIJADDI_APPS_ROOT).",
         ),
         _rule(
             "release_tanzeel_build",
@@ -527,11 +496,6 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
             "euqid_contract_python_stack",
             sc_euqid_contract_stack,
             "تطبيق **عقد (Euqid)** يعتمد على Python وواجهة سطح مكتب (pywebview وحزم المستندات): من مجلد Euqid أنشئ بيئة `python -m venv .venv`، فعّلها، ثم `pip install -r requirements.txt` (أو ثبّت الحزم المذكورة في manifest). على ويندوز إن ظهر خطأ متعلق بـ WebView ثبّت **WebView2 Runtime** من Microsoft؛ إن استمرّ الخطأ انسخ كامل السجل من الطرفية.",
-        ),
-        _rule(
-            "dental_assistant_streamlit_stack",
-            sc_dental_assistant_streamlit_stack,
-            "**مساعد طبيب الأسنان (أحمد فلاح)** يعمل بـ **Streamlit**: من مجلد التطبيق أنشئ `python -m venv .venv`، فعّل البيئة، ثم `pip install -r requirements.txt` (streamlit، pandas، plotly…). شغّل `streamlit run main.py`؛ إن فشل المنفذ 8501 أغلق النوافذ القديمة أو غيّر المنفذ. لمزامنة المنصّة استخدم `ALIJADDI_SUPABASE_ACCESS_TOKEN` كما في الوثائق.",
         ),
         _rule(
             "uninstall_fail",

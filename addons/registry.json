@@ -8,7 +8,7 @@
   "models": [
     {
       "id": "alijaddi_platform",
-      "version": "0.4.1-beta",
+      "version": "0.3.3-beta",
       "manifest": "manifests/alijaddi_platform.json"
     },
     {

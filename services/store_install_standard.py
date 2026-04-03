@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 معيار **store_consent_v2** — التثبيت الفعلي لتطبيقات المتجر يتم عبر **Ali12**
-(``scripts/ali12_store_install.py``) خارج واجهة المنصّة؛ الحاضنة الافتراضية «تطبيقات علي جدي».
+(``scripts/ali12_store_install.py``) خارج واجهة المنصّة؛ الافتراضي **مدير تنزيلات** علي جدّي: ``~/.alijaddi/downloads``.
 
 دوال ``run_store_install_consent`` تبقى للتوافق مع شيفرة قديمة أو مسارات خاصة؛
 واجهة متجر Qt الحالية لا تستدعي التثبيت المباشر.
@@ -20,7 +20,7 @@ from services.addon_manager import load_installed
 from services.install_telemetry import emit_install_event
 from services.paths import apps_root
 
-# يُكتب في التتبع وبيانات التدريب — v2: زر «تثبيت تلقائي» على سطح المكتب بدون منتقي مجلد إلزامي
+# يُكتب في التتبع وبيانات التدريب — v2: زر التثبيت في مجلد التنزيلات الافتراضي (.alijaddi/downloads)
 STORE_INSTALL_CONTRACT_VERSION = "store_consent_v2"
 STORE_INSTALL_FLOW_KIND = "store_consent"
 
@@ -30,7 +30,7 @@ class StoreInstallPrep:
     """نتيجة خطوات الموافقة + (اختياري) المجلد قبل بدء التحميل."""
 
     apps_parent: Optional[Path]
-    """مسار المجلد الأب لـ ``install_model`` — حاضنة «تطبيقات علي جدي» أو مسار مخصّص."""
+    """مسار المجلد الأب لـ ``install_model`` — جذر مدير التنزيلات أو مسار مخصّص."""
 
     cancel_phase: Optional[str]
     """``consent`` | ``folder`` إن أُلغي؛ وإلا ``None``."""
@@ -45,16 +45,16 @@ def run_store_install_consent(
     display_name: str,
 ) -> StoreInstallPrep:
     """
-    1) حوار موافقة يشرح المعيار الجديد (سطح المكتب التلقائي).
+    1) حوار موافقة يشرح مجلد التنزيلات الافتراضي.
     2) إما ``apps_root()`` مباشرة، أو منتقي مجلد الأب لمن يريد مساراً مختلفاً.
     """
     consent = QMessageBox(parent)
     consent.setIcon(QMessageBox.Icon.Information)
     consent.setWindowTitle("تثبيت من المتجر")
     consent.setText(
-        "بعد موافقتك، تثبّت المنصّة التطبيق <b>تلقائياً</b> داخل مجلد "
-        "<b>«تطبيقات علي جدي»</b> على سطح المكتب (أو OneDrive Desktop إن وُجد) — "
-        "ويُنشأ <b>اختصار على سطح المكتب</b> باسم التطبيق عند النجاح. "
+        "بعد موافقتك، تُفكّ الحزمة <b>تلقائياً</b> داخل <b>مدير تنزيلات علي جدّي</b> "
+        "(المجلد <code>.alijaddi/downloads</code> في مجلد المستخدم) — "
+        "ويُنشأ <b>اختصار على سطح المكتب</b> يفتح مجلد التطبيق عند النجاح. "
         f"معيار المتجر: <b>{STORE_INSTALL_CONTRACT_VERSION}</b>."
     )
     consent.setInformativeText(
@@ -62,7 +62,7 @@ def run_store_install_consent(
         "مساعد <b>Ali12</b> يفسّر أخطاء التنزيل والفك من سجلات المنصّة."
     )
     btn_auto = consent.addButton(
-        "تثبيت تلقائياً على سطح المكتب (موصى به)", QMessageBox.ButtonRole.AcceptRole
+        "تثبيت في مجلد التنزيلات الافتراضي (موصى به)", QMessageBox.ButtonRole.AcceptRole
     )
     btn_custom = consent.addButton(
         "اختيار مجلد آخر…", QMessageBox.ButtonRole.ActionRole

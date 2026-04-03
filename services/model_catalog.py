@@ -151,7 +151,7 @@ _FALLBACK_ENTRIES: list[dict[str, Any]] = [
     {
         "id": "dental_assistant",
         "name": "مساعد طبيب الأسنان",
-        "desc": "إدارة عيادة الأسنان — تجربة تجريبية مع 198 مستخدم زائر؛ أحمد فلاح؛ Streamlit + مزامنة AliJaddi Cloud",
+        "desc": "إدارة عيادة الأسنان — مدير تنزيلات؛ 198 مستخدم زائر؛ أحمد فلاح؛ Streamlit + Cloud",
         "icon": "MEDICAL_SERVICES_ROUNDED",
         "color": "#0D9488",
         "folder": "AhmadFalahDentalAssistant",

@@ -8,7 +8,7 @@
   python scripts/ali12_store_install.py install euqid --parent "D:\\مسار\\أب"
   python scripts/ali12_store_install.py uninstall dental_assistant
 
-التثبيت الافتراضي: مجلد «تطبيقات علي جدي» على سطح المكتب (أو ALIJADDI_APPS_ROOT).
+التثبيت الافتراضي: مدير تنزيلات علي جدّي — %USERPROFILE%\\.alijaddi\\downloads (أو ALIJADDI_APPS_ROOT).
 تحديثات الإصدارات: تظهر في متجر المنصّة بعد مزامنة السجل؛ إعادة تشغيل نفس أمر install تستبدل المجلد.
 """
 from __future__ import annotations
@@ -118,7 +118,7 @@ def main() -> int:
     p_in.add_argument("model_id", help="معرف التطبيق (مثل dental_assistant)")
     p_in.add_argument(
         "--parent",
-        help="مجلد الأب للتثبيت (افتراضي: حاضنة «تطبيقات علي جدي»)",
+        help="مجلد الأب للتثبيت (افتراضي: .alijaddi/downloads)",
         default="",
     )
     p_in.set_defaults(func=cmd_install)

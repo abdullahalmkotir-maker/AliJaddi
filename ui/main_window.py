@@ -1089,7 +1089,7 @@ class MainWindow(QMainWindow):
         st_hint = _label(
             "**علي جدي (المنصّة):** بطاقة أولاً — إصدار `platform` من السجل بعد المزامنة، ثم تحديث أو صفحة GitHub. "
             "**تطبيقات المتجر:** لا يُثبَّت من داخل الواجهة؛ استخدم **Ali12** من سطر الأوامر (زر «تعليمات التثبيت» على كل بطاقة). "
-            f"المعيار {STORE_INSTALL_CONTRACT_VERSION} — الحاضنة «تطبيقات علي جدي».",
+            f"المعيار {STORE_INSTALL_CONTRACT_VERSION} — مدير التنزيلات (.alijaddi/downloads).",
             12, color=t.text2, wrap=True,
         )
         st_hint.setMaximumHeight(56)

@@ -27,7 +27,9 @@ def test_apps_paths_resolve():
 
     assert bundle_root().is_dir()
     assert primary_icon_path().name.endswith(".png")
-    assert apps_root().name == "تطبيقات علي جدي"
+    ar = apps_root()
+    assert ar.name == "downloads"
+    assert ar.parent.name == ".alijaddi"
 
 
 def test_main_window_constructible():

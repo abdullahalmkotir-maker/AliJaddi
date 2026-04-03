@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-إعادة تثبيت نماذج المتجر داخل حاضنة «تطبيقات علي جدي» من روابط `addons/manifests/*.json`.
+إعادة تثبيت نماذج المتجر في **مدير تنزيلات** علي جدّي (``~/.alijaddi/downloads``) من روابط `addons/manifests/*.json`.
 
 الاستخدام من جذر المستودع:
   python scripts/reinstall_incubator_models.py
@@ -48,12 +48,12 @@ def main() -> int:
     ap.add_argument(
         "--only-missing",
         action="store_true",
-        help="تثبيت فقط إن كان مجلد التطبيق غير موجود داخل الحاضنة",
+        help="تثبيت فقط إن كان مجلد التطبيق غير موجود تحت جذر التنزيلات",
     )
     ns = ap.parse_args()
 
     root = apps_root().resolve()
-    print(f"الحاضنة: {root}\n", flush=True)
+    print(f"جذر التنزيلات: {root}\n", flush=True)
 
     manifests = _load_manifests()
     aparent = root
