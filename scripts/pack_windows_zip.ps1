@@ -1,5 +1,5 @@
 # ZIP محمول مكمّل — المعيار الرسمي للمستخدمين هو AliJaddi-Beta-…-Setup.exe (Inno، أسلوب Blender).
-# Packs dist\AliJaddi → تنزيل\windows\AliJaddi-Beta-0.4.0-Windows.zip + unpacked copy
+# Packs dist\AliJaddi → تنزيل\windows\AliJaddi-Beta-0.4.1-Windows.zip + unpacked copy
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path (Join-Path $root "main_qt.py"))) {
@@ -10,7 +10,7 @@ $dist = Join-Path (Join-Path $root "dist") "AliJaddi"
 # Arabic folder name without non-ASCII in script source (encoding-safe)
 $tanzeel = "$([char]0x062A)$([char]0x0646)$([char]0x0632)$([char]0x064A)$([char]0x0644)"
 $outDir = Join-Path (Join-Path $root $tanzeel) "windows"
-$releaseName = "AliJaddi-Beta-0.4.0-Windows"
+$releaseName = "AliJaddi-Beta-0.4.1-Windows"
 $zip = Join-Path $outDir "$releaseName.zip"
 $unpackRoot = Join-Path $outDir $releaseName
 $unpackApp = Join-Path $unpackRoot "AliJaddi"

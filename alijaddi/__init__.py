@@ -6,6 +6,6 @@
 الألوان الموحّدة: ``alijaddi.visual_identity``.
 """
 
-__version__ = "0.4.0-beta"
+__version__ = "0.4.1-beta"
 
 ALI12_ASSISTANT_ID = "Ali12"

@@ -29,6 +29,9 @@ from alijaddi.visual_identity import (
     ACCENT_CYAN,
 )
 
+# حجم أيقونة الحرف في بطاقات النماذج/المتجر (أصغر = كثافة أعلى على الشاشة)
+MODEL_CARD_ICON_PX = 36
+
 
 class ThemeManager:
     def __init__(self):
@@ -185,7 +188,7 @@ class ThemeManager:
         """
 
 
-def create_model_icon(letter: str, color: str, size: int = 44) -> QPixmap:
+def create_model_icon(letter: str, color: str, size: int = MODEL_CARD_ICON_PX) -> QPixmap:
     """Colored rounded-rect with a letter — used for model cards."""
     dpr = 2
     real = size * dpr

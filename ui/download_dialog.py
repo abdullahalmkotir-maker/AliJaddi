@@ -64,8 +64,8 @@ class DownloadDialog(QDialog):
         hdr = QHBoxLayout()
         icon_lbl = QLabel()
         letter = model_name[0] if model_name else "?"
-        icon_lbl.setPixmap(create_model_icon(letter, model_color, 48))
-        icon_lbl.setFixedSize(48, 48)
+        icon_lbl.setPixmap(create_model_icon(letter, model_color, 40))
+        icon_lbl.setFixedSize(40, 40)
         hdr.addWidget(icon_lbl)
 
         hdr_col = QVBoxLayout()

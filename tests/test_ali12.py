@@ -228,3 +228,13 @@ def test_suggest_launch_fail_exit_code():
         detail={"exit_code": 1},
     )
     assert "رمز" in s or "1" in s
+
+
+def test_dental_assistant_streamlit_stack_rule_scores():
+    r = ali12.resolve_ali12(
+        event_kind="install_fail",
+        message="ModuleNotFoundError: No module named 'streamlit'",
+        detail={"model_id": "dental_assistant", "folder": "AhmadFalahDentalAssistant"},
+    )
+    ids = [x["rule_id"] for x in r.get("signals", {}).get("top_rules", [])]
+    assert "dental_assistant_streamlit_stack" in ids

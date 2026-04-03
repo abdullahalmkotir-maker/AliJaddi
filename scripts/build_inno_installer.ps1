@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root "dist\AliJaddi"
 $iss = Join-Path $root "AliJaddi_Setup.iss"
-$setupName = "AliJaddi-Beta-0.4.0-Setup.exe"
+$setupName = "AliJaddi-Beta-0.4.1-Setup.exe"
 $built = Join-Path $root "installer\$setupName"
 
 if (-not (Test-Path $dist)) {

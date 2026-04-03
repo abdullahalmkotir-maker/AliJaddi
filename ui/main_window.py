@@ -17,7 +17,7 @@ from PySide6.QtCore import Qt, QSize, Signal, QTimer, QUrl
 from PySide6.QtGui import QFont, QPixmap, QIcon, QColor, QPainter, QCursor, QGuiApplication, QDesktopServices
 
 from ui.theme_qt import (
-    ThemeManager, create_model_icon,
+    ThemeManager, create_model_icon, MODEL_CARD_ICON_PX,
     PRIMARY, DANGER, SUCCESS, STAR, ACCENT_CYAN,
 )
 from ui.login_dialog import LoginDialog
@@ -172,8 +172,8 @@ class ModelCard(CardFrame):
         hdr.setSpacing(10)
         icon_lbl = QLabel()
         letter = name[0] if name else "?"
-        icon_lbl.setPixmap(create_model_icon(letter, color, 44))
-        icon_lbl.setFixedSize(44, 44)
+        icon_lbl.setPixmap(create_model_icon(letter, color, MODEL_CARD_ICON_PX))
+        icon_lbl.setFixedSize(MODEL_CARD_ICON_PX, MODEL_CARD_ICON_PX)
         hdr.addWidget(icon_lbl)
 
         name_col = QVBoxLayout()
@@ -316,8 +316,8 @@ class AddonCard(CardFrame):
         hdr = QHBoxLayout()
         hdr.setSpacing(10)
         icon_lbl = QLabel()
-        icon_lbl.setPixmap(create_model_icon(letter, color, 44))
-        icon_lbl.setFixedSize(44, 44)
+        icon_lbl.setPixmap(create_model_icon(letter, color, MODEL_CARD_ICON_PX))
+        icon_lbl.setFixedSize(MODEL_CARD_ICON_PX, MODEL_CARD_ICON_PX)
         hdr.addWidget(icon_lbl)
 
         name_col = QVBoxLayout()
@@ -538,7 +538,7 @@ class MainWindow(QMainWindow):
         if icon_path.exists():
             logo_img = QLabel()
             pm = QPixmap(str(icon_path)).scaled(
-                28, 28, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation
             )
             logo_img.setPixmap(pm)
             lay.addWidget(logo_img)
@@ -611,10 +611,10 @@ class MainWindow(QMainWindow):
         rail.setStyleSheet(
             f"QFrame#actRail {{ background: {t.bg}; {edge}: 1px solid {t.border}; }}"
         )
-        rail.setFixedWidth(52)
+        rail.setFixedWidth(48)
         vl = QVBoxLayout(rail)
         vl.setContentsMargins(4, 14, 4, 10)
-        vl.setSpacing(4)
+        vl.setSpacing(3)
         pc = QColor(t.primary)
         tip_keys = (
             "activity_tip_home",
@@ -629,11 +629,11 @@ class MainWindow(QMainWindow):
             btn.setCheckable(True)
             btn.setText(emoji)
             btn.setToolTip(i18n.tr(tip_key))
-            btn.setFixedSize(44, 44)
+            btn.setFixedSize(38, 38)
             btn.setCursor(Qt.PointingHandCursor)
             btn.setStyleSheet(
                 f"QToolButton {{ background: transparent; border: none; border-radius: 8px; "
-                f"font-size: 19px; color: {t.text}; }}"
+                f"font-size: 17px; color: {t.text}; }}"
                 f"QToolButton:hover {{ background: rgba(128,128,128,0.12); }}"
                 f"QToolButton:checked {{ background: rgba({pc.red()},{pc.green()},{pc.blue()},0.25); }}"
             )
@@ -1314,9 +1314,9 @@ class MainWindow(QMainWindow):
             row = QHBoxLayout()
             icon_lbl = QLabel()
             icon_lbl.setPixmap(create_model_icon(
-                m.get("name", "?")[0], m.get("color", PRIMARY), 32
+                m.get("name", "?")[0], m.get("color", PRIMARY), 28
             ))
-            icon_lbl.setFixedSize(32, 32)
+            icon_lbl.setFixedSize(28, 28)
             row.addWidget(icon_lbl)
             rc = QVBoxLayout()
             rc.setSpacing(0)

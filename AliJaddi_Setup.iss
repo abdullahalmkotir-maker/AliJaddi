@@ -3,7 +3,7 @@
 ; يتطلب مجلد dist\AliJaddi من PyInstaller مسبقاً.
 ; التجميع: Inno Setup 6 — ISCC.exe AliJaddi_Setup.iss
 
-#define MyAppVersion "0.4.0"
+#define MyAppVersion "0.4.1"
 #define MyAppName "AliJaddi"
 
 [Setup]
@@ -19,7 +19,7 @@ AppSupportURL=https://alijaddi.app
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir=installer
-OutputBaseFilename=AliJaddi-Beta-0.4.0-Setup
+OutputBaseFilename=AliJaddi-Beta-0.4.1-Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

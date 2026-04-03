@@ -374,6 +374,37 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
         )
         return 8.0 + bonus + 14.0 * j
 
+    def sc_dental_assistant_streamlit_stack(ctx: Ali12Context) -> float:
+        mid = str(ctx.detail.get("model_id", "") or "").lower()
+        fol = str(ctx.detail.get("folder", "") or "").lower()
+        legacy = "ahmadfalahdentalassistant" in fol or (
+            "smart assistant" in fol and "yassiri" in fol
+        )
+        if mid != "dental_assistant" and not legacy:
+            return 0.0
+        t = ctx.combined_text.lower()
+        bonus = 0.0
+        for needle in (
+            "streamlit",
+            "modulenotfound",
+            "no module named",
+            "pandas",
+            "plotly",
+            "openpyxl",
+            "pillow",
+            "badzipfile",
+            "file is not a zip",
+            "connection refused",
+            "8501",
+        ):
+            if needle in t:
+                bonus += 4.0
+        j = jaccard_keywords(
+            ctx.combined_text,
+            frozenset({"streamlit", "module", "python", "pip", "requirements", "venv", "zip", "main.py"}),
+        )
+        return 8.0 + bonus + 14.0 * j
+
     def sc_uninstall(ctx: Ali12Context) -> float:
         return 100.0 if ctx.event_kind == "uninstall_fail" else 0.0
 
@@ -496,6 +527,11 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
             "euqid_contract_python_stack",
             sc_euqid_contract_stack,
             "تطبيق **عقد (Euqid)** يعتمد على Python وواجهة سطح مكتب (pywebview وحزم المستندات): من مجلد Euqid أنشئ بيئة `python -m venv .venv`، فعّلها، ثم `pip install -r requirements.txt` (أو ثبّت الحزم المذكورة في manifest). على ويندوز إن ظهر خطأ متعلق بـ WebView ثبّت **WebView2 Runtime** من Microsoft؛ إن استمرّ الخطأ انسخ كامل السجل من الطرفية.",
+        ),
+        _rule(
+            "dental_assistant_streamlit_stack",
+            sc_dental_assistant_streamlit_stack,
+            "**مساعد طبيب الأسنان (أحمد فلاح)** يعمل بـ **Streamlit**: من مجلد التطبيق أنشئ `python -m venv .venv`، فعّل البيئة، ثم `pip install -r requirements.txt` (streamlit، pandas، plotly…). شغّل `streamlit run main.py`؛ إن فشل المنفذ 8501 أغلق النوافذ القديمة أو غيّر المنفذ. لمزامنة المنصّة استخدم `ALIJADDI_SUPABASE_ACCESS_TOKEN` كما في الوثائق.",
         ),
         _rule(
             "uninstall_fail",

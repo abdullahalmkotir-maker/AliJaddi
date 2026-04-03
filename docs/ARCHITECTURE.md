@@ -1,4 +1,4 @@
-# معمارية منصّة علي جدّي (Beta 0.4.0)
+# معمارية منصّة علي جدّي (Beta 0.4.1)
 
 توثيق يربط **المنصّة الرئيسية**، **السحابة**، **حساب المستخدم**، ومشاريع **النماذج** على سطح المكتب.
 
@@ -42,8 +42,8 @@ flowchart TB
 
 ## بناء التوزيع (Windows)
 
-- **المعيار الرسمي (مثل Blender):** `AliJaddi-Beta-0.4.0-Setup.exe` — مثبّت Inno (`AliJaddi_Setup.iss`): Program Files، قائمة ابدأ، تسجيل إزالة في «التطبيقات». يُبنى تلقائياً مع `scripts/build_windows_release.ps1` ويتطلب **Inno Setup 6** على جهاز البناء؛ للتخطي مؤقتاً: `ALIJADDI_SKIP_INNO=1` (ZIP فقط — ليس القناة الرئيسية).
-- **مكمّل:** `تنزيل/windows/AliJaddi-Beta-0.4.0-Windows.zip` والمجلد المفكوك — نسخة محمولة دون مثبّت.
+- **المعيار الرسمي (مثل Blender):** `AliJaddi-Beta-0.4.1-Setup.exe` — مثبّت Inno (`AliJaddi_Setup.iss`): Program Files، قائمة ابدأ، تسجيل إزالة في «التطبيقات». يُبنى تلقائياً مع `scripts/build_windows_release.ps1` ويتطلب **Inno Setup 6** على جهاز البناء؛ للتخطي مؤقتاً: `ALIJADDI_SKIP_INNO=1` (ZIP فقط — ليس القناة الرئيسية).
+- **مكمّل:** `تنزيل/windows/AliJaddi-Beta-0.4.1-Windows.zip` والمجلد المفكوك — نسخة محمولة دون مثبّت.
 - `scripts/build_windows_release.ps1` — PyInstaller + ZIP + Inno بالترتيب.
 
 ## رؤية المنصّة المبسّطة (متجر تطبيقات + تثبيت + ذكاء مساعد)
@@ -93,4 +93,4 @@ flowchart LR
 
 ---
 
-© 2026 AliJaddi — بيتا 0.4.0
+© 2026 AliJaddi — بيتا 0.4.1
