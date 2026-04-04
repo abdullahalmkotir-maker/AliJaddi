@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import json
-import os
 import platform
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -14,15 +13,13 @@ from typing import Any, Optional
 import httpx
 
 from alijaddi import __version__ as PLATFORM_VERSION
+from alijaddi.config import SUPABASE_ANON_KEY, SUPABASE_URL
 from Ali12 import resolve_ali12
 from services.assistants_squad import pick_assistant_for_telemetry_detail
 from services.local_store import _DIR, load_session
 
 _TELEMETRY_FILE = _DIR / "telemetry_install_events.jsonl"
 _MAX_LOCAL_BYTES = 2_000_000
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 
 def _truncate(s: str, n: int = 2000) -> str:

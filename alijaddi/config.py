@@ -6,7 +6,9 @@ from pathlib import Path
 
 PLATFORM_ROOT = Path(__file__).resolve().parent.parent
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
+# مرجع المشروع الموحّد مع AliJaddi Cloud و AliJaddiAccount (لوحة Supabase)
+_DEFAULT_SUPABASE_URL = "https://mfhtnfxdfpelrgzonxov.supabase.co"
+SUPABASE_URL = os.getenv("SUPABASE_URL", _DEFAULT_SUPABASE_URL).rstrip("/")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 CLOUD_SYNC_APPLY_STARS = os.getenv("CLOUD_SYNC_APPLY_STARS", "true").lower() in (
     "1", "true", "yes",

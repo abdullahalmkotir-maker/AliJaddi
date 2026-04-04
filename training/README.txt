@@ -11,4 +11,4 @@
 
 — بناء نسخة ويندوز قابلة للتثبيت (ZIP + Setup عند توفر Inno):
   powershell -ExecutionPolicy Bypass -File scripts/build_windows_release.ps1
-  المخرجات: تنزيل\windows\AliJaddi-Beta-0.5.1-Setup.exe و AliJaddi-Beta-0.5.1-Windows.zip
+  المخرجات: تنزيل\windows\AliJaddi-Beta-0.5.2-Setup.exe و AliJaddi-Beta-0.5.2-Windows.zip

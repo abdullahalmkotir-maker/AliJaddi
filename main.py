@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-لوحة متجر علي جدّي (Streamlit) — صفحة واحدة بارتفاع نافذة المتصفح دون تمرير عمودي للصفحة.
+لوحة متجر علي جدّي (Streamlit) — صفحة واحدة بارتفاع نافذة المتصفح (100vh) دون تمرير عمودي للصفحة.
+المحتوى الداخلي للبطاقات يستخدم overflow-y: auto عند الحاجة.
 
 تشغيل من جذر المستودع::
 
@@ -11,6 +12,7 @@
 """
 from __future__ import annotations
 
+import base64
 import html
 import os
 import sys
@@ -31,6 +33,22 @@ from services.store_experience import get_store_experience_offline_first
 
 STORE_PASSWORD = "store_consent_v2"
 _MIN_VIEWPORT = (1366, 768)
+
+
+def _logo_data_uri() -> str:
+    p = primary_icon_path()
+    if not p.is_file():
+        return ""
+    try:
+        raw = p.read_bytes()
+        b64 = base64.b64encode(raw).decode("ascii")
+        ext = p.suffix.lower()
+        mime = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ico": "image/x-icon"}.get(
+            ext, "image/png"
+        )
+        return f"data:{mime};base64,{b64}"
+    except OSError:
+        return ""
 
 
 def _load_local_stats() -> dict:
@@ -161,168 +179,265 @@ def _create_desktop_url(display_name: str, folder_name: str) -> Path | None:
 
 def _inject_css() -> None:
     st.markdown(
-        f"""
+        """
 <style>
-  html, body, .stApp {{
-    background-color: #1e1e1e !important;
+  :root {
+    --aj-bg: #1e1e1e;
+    --aj-card: rgba(45, 45, 45, 0.92);
+    --aj-border: #3d3d3d;
+    --aj-blue: #0078d4;
+    --aj-blue-hover: #1084d8;
+    --aj-mid-h: calc(100vh - 46px - 76px - 58px - 18px);
+  }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+    background: var(--aj-bg) !important;
+  }
+  .stApp {
+    background-color: var(--aj-bg) !important;
     color: #e8e8e8 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+  }
+  /* لوحة التحكم: لا تمرير للصفحة */
+  .stApp:has(#aj-dash-marker) {
     overflow: hidden !important;
+  }
+  /* شاشة الدخول: اسمح بالتمرير عند الضيق */
+  .stApp:not(:has(#aj-dash-marker)) {
+    overflow-y: auto !important;
+  }
+  [data-testid="stAppViewContainer"] {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .stApp:has(#aj-dash-marker) [data-testid="stAppViewContainer"] {
+    overflow: hidden !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+  }
+  .stApp:has(#aj-dash-marker) [data-testid="stAppViewContainer"] > .main {
+    overflow: hidden !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+  }
+  /* إخفاء شريط Streamlit العلوي لتوفير المسافة (1366×768) */
+  .stApp:has(#aj-dash-marker) header[data-testid="stHeader"] {
+    display: none !important;
+  }
+  .stApp:has(#aj-dash-marker) [data-testid="stToolbar"] {
+    display: none !important;
+  }
+  .stApp:has(#aj-dash-marker) [data-testid="stDecoration"] {
+    display: none !important;
+  }
+  section[data-testid="stSidebar"] {
+    display: none !important;
+  }
+  [data-testid="collapsedControl"] {
+    display: none !important;
+  }
+  footer { visibility: hidden !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
+  .stApp:has(#aj-dash-marker) section.main > div.block-container {
+    padding: 0.2rem 0.45rem 0.15rem 0.45rem !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
     height: 100vh !important;
     max-height: 100vh !important;
-  }}
-  [data-testid="stAppViewContainer"] {{
     overflow: hidden !important;
-    height: 100vh !important;
-  }}
-  [data-testid="stAppViewContainer"] > .main {{
+    box-sizing: border-box !important;
+  }
+  .stApp:has(#aj-dash-marker) section.main div[data-testid="stVerticalBlock"] {
+    gap: 0.3rem !important;
+    height: 100% !important;
+    max-height: 100vh !important;
     overflow: hidden !important;
-    height: 100vh !important;
-  }}
-  section.main > div.block-container {{
-    padding: 0.35rem 0.75rem 0.25rem 0.75rem !important;
-    max-width: 100% !important;
-    height: calc(100vh - 0px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .stApp:has(#aj-dash-marker) .element-container:has(#aj-dash-marker) {
+    flex: 0 0 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: hidden !important;
-    display: flex;
-    flex-direction: column;
-  }}
-  #alijaddi-dashboard {{
+  }
+  .stApp:has(#aj-dash-marker) .element-container:has(.aj-row1-grid) {
+    flex: 0 0 auto !important;
+  }
+  /* توسيط الصف ذي العمودين: الحاوية الأب تمتد داخل العمود الرأسي الرئيسي */
+  .stApp:has(#aj-dash-marker) section.main div[data-testid="stVerticalBlock"] > div {
+    min-height: 0 !important;
+  }
+  .stApp:has(#aj-dash-marker) section.main div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child)) {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .stApp:has(#aj-dash-marker) section.main div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(3):last-child)) {
+    flex: 0 0 auto !important;
+  }
+  .stApp:has(#aj-dash-marker) section.main div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(4):last-child)) {
+    flex: 0 0 auto !important;
+  }
+  /* صف الأعمدة المكوّن من عمودين فقط = المنطقة الوسطى */
+  .stApp:has(#aj-dash-marker) div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child) {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: var(--aj-mid-h) !important;
+    max-height: var(--aj-mid-h) !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+    display: flex !important;
+  }
+  .stApp:has(#aj-dash-marker) div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child) > div[data-testid="column"] {
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .stApp:has(#aj-dash-marker) div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child) > div[data-testid="column"] > div[data-testid="stVerticalBlock"] {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    gap: 0.25rem !important;
+  }
+  /* صف التطبيقات: أعمدة ثلاثة (شعار / عنوان / خروج) */
+  .stApp:has(#aj-dash-marker) div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(3):last-child) {
+    flex: 0 0 auto !important;
+    min-height: 42px !important;
+    max-height: 46px !important;
+    align-items: center !important;
+  }
+  /* صف الأسفل: أربعة أعمدة */
+  .stApp:has(#aj-dash-marker) div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(4):last-child) {
+    flex: 0 0 auto !important;
+    min-height: 52px !important;
+    max-height: 58px !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+  .aj-row1-grid {
     direction: rtl;
-    flex: 1;
-    min-height: 0;
-    display: grid;
-    grid-template-rows: minmax(72px, auto) minmax(0, 1fr) minmax(56px, auto);
-    gap: 0.35rem;
-    height: 100%;
-    max-height: calc(100vh - 1rem);
-  }}
-  /* تطبيقات يسار، ليدر بورد يمين — ترتيب أعمدة Streamlit يبقى LTR */
-  #alijaddi-dashboard .aj-row2 {{
-    direction: ltr;
-  }}
-  #alijaddi-dashboard .aj-row2 .aj-panel,
-  #alijaddi-dashboard .aj-row1,
-  #alijaddi-dashboard .aj-row3 {{
-    direction: rtl;
-  }}
-  .aj-row1 {{
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.4rem;
+    gap: 0.35rem;
+    flex: 0 0 auto !important;
+    min-height: 68px !important;
+    max-height: 76px !important;
     align-items: stretch;
-  }}
-  .aj-metric-card {{
-    background: rgba(45, 45, 45, 0.92);
-    border: 1px solid #3d3d3d;
+  }
+  .aj-metric-card {
+    background: var(--aj-card);
+    border: 1px solid var(--aj-border);
     border-radius: 8px;
-    padding: 0.35rem 0.5rem;
+    padding: 0.3rem 0.4rem;
     text-align: center;
-    font-size: clamp(0.72rem, 1.1vw, 0.88rem);
-  }}
-  .aj-metric-card strong {{
-    display: block;
-    font-size: clamp(1rem, 2vw, 1.35rem);
-    color: #fff;
-    margin-top: 0.15rem;
-  }}
-  .aj-row2 {{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.45rem;
-    min-height: 0;
-  }}
-  .aj-panel {{
-    background: rgba(45, 45, 45, 0.88);
-    border: 1px solid #3a3a3a;
-    border-radius: 8px;
-    padding: 0.35rem 0.45rem;
-    min-height: 0;
+    font-size: clamp(0.68rem, 1vw, 0.82rem);
+    line-height: 1.2;
     display: flex;
     flex-direction: column;
-  }}
-  .aj-panel h4 {{
-    margin: 0 0 0.25rem 0;
-    font-size: clamp(0.75rem, 1.2vw, 0.9rem);
-    color: #ccc;
+    justify-content: center;
+  }
+  .aj-metric-card strong {
+    font-size: clamp(0.95rem, 1.85vw, 1.2rem);
+    color: #fff;
+    margin-top: 0.12rem;
+    font-weight: 700;
+  }
+  .aj-panel-title {
+    margin: 0 0 0.2rem 0;
+    font-size: clamp(0.72rem, 1.1vw, 0.86rem);
+    color: #c8c8c8;
+    font-weight: 600;
     flex-shrink: 0;
-  }}
-  .aj-scroll-y {{
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }}
-  .aj-scroll-x {{
-    flex: 1;
-    min-height: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
+  }
+  .aj-scroll-x-apps {
+    direction: rtl;
     display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
     gap: 0.35rem;
-    align-items: stretch;
-    padding-bottom: 0.2rem;
-  }}
-  .aj-app-card {{
-    flex: 0 0 140px;
-    background: #252525;
-    border: 1px solid #444;
+    overflow-x: auto;
+    overflow-y: hidden;
+    min-height: 0;
+    max-height: clamp(72px, 14vh, 100px);
+    padding-bottom: 0.15rem;
+    flex-shrink: 0;
+  }
+  .aj-app-card {
+    flex: 0 0 auto;
+    min-width: 118px;
+    max-width: 140px;
+    background: rgba(37, 37, 37, 0.95);
+    border: 1px solid #4a4a4a;
     border-radius: 8px;
-    padding: 0.35rem;
-    font-size: 0.78rem;
-  }}
-  .aj-row3 {{
-    display: grid;
-    grid-template-columns: 1fr auto auto auto;
-    gap: 0.4rem;
-    align-items: center;
-    background: rgba(40, 40, 40, 0.95);
-    border: 1px solid #3d3d3d;
-    border-radius: 8px;
-    padding: 0.3rem 0.5rem;
-    font-size: clamp(0.68rem, 1vw, 0.82rem);
-  }}
-  div[data-testid="stVerticalBlockBorderWrapper"] {{
-    border: none !important;
-  }}
-  .stButton > button {{
-    background-color: #0078d4 !important;
+    padding: 0.3rem 0.35rem;
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+  .aj-updates-line {
+    line-height: 1.22;
+    font-size: clamp(0.65rem, 0.95vw, 0.78rem);
+    direction: rtl;
+    text-align: right;
+    overflow: hidden;
+    max-height: 52px;
+  }
+  .stButton > button {
+    background-color: var(--aj-blue) !important;
     color: #fff !important;
     border: none !important;
     border-radius: 6px !important;
-    font-weight: 600;
-    padding: 0.25rem 0.65rem !important;
-    font-size: 0.78rem !important;
-  }}
-  .stButton > button:hover {{
-    background-color: #1084d8 !important;
+    font-weight: 600 !important;
+    padding: 0.22rem 0.55rem !important;
+    font-size: clamp(0.68rem, 0.95vw, 0.78rem) !important;
+  }
+  .stButton > button:hover {
+    background-color: var(--aj-blue-hover) !important;
     box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.35);
-  }}
-  [data-testid="stHeader"] {{
-    background: rgba(30, 30, 30, 0.95);
-  }}
-  [data-testid="stDecoration"] {{
-    display: none;
-  }}
-  section[data-testid="stSidebar"] {{
-    display: none !important;
-  }}
-  [data-testid="collapsedControl"] {{
-    display: none !important;
-  }}
-  footer {{ visibility: hidden; height: 0; }}
-  .aj-login-box {{
-    max-width: 360px;
-    margin: 2rem auto;
-    padding: 1rem;
+  }
+  div[data-testid="stVerticalBlockBorderWrapper"] {
+    border: none !important;
+  }
+  .aj-login-wrap {
+    direction: rtl;
+    max-width: 380px;
+    margin: 0.75rem auto;
+    padding: 0.85rem;
     background: #2d2d2d;
     border-radius: 10px;
     border: 1px solid #444;
-  }}
-  /* جداول مضغوطة داخل اللوحة */
-  .aj-scroll-y [data-testid="stDataFrame"] {{
-    max-height: 100% !important;
-  }}
+  }
+  .aj-login-topbar {
+    direction: rtl;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0.5rem 0.5rem 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .aj-login-topbar img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 6px;
+  }
+  /* جداول مضغوطة */
+  [data-testid="stDataFrame"] {
+    border-radius: 6px;
+  }
 </style>
 """,
         unsafe_allow_html=True,
@@ -330,8 +445,19 @@ def _inject_css() -> None:
 
 
 def _render_login() -> None:
-    st.markdown('<div class="aj-login-box">', unsafe_allow_html=True)
-    st.markdown("### 🔐 دخول مدير المتجر")
+    logo = _logo_data_uri()
+    left_logo = f'<img src="{logo}" alt=""/>' if logo else "<span style='font-size:1.6rem'>🛒</span>"
+    st.markdown(
+        f"""
+<div class="aj-login-topbar">
+  <div style="display:flex;align-items:center;gap:0.35rem">{left_logo}<span style="font-weight:700;font-size:clamp(0.85rem,2vw,1rem)">علي جدّي</span></div>
+  <span style="opacity:0.75;font-size:0.78rem">🔐 دخول</span>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    st.markdown('<div class="aj-login-wrap">', unsafe_allow_html=True)
+    st.markdown("#### 🔐 دخول مدير المتجر")
     pw = st.text_input("كلمة المرور", type="password", label_visibility="collapsed", placeholder="كلمة المرور")
     if st.button("تسجيل الدخول", type="primary", use_container_width=True):
         if pw == STORE_PASSWORD:
@@ -356,6 +482,11 @@ def main() -> None:
         _render_login()
         return
 
+    st.markdown(
+        '<div id="aj-dash-marker" aria-hidden="true" style="height:0;margin:0;padding:0;line-height:0;overflow:hidden"></div>',
+        unsafe_allow_html=True,
+    )
+
     reg = get_registry_offline_first()
     xp = get_store_experience_offline_first()
     installed = load_installed()
@@ -364,60 +495,61 @@ def main() -> None:
     n_ok, n_stars, n_hinges, n_apps = _stats_four(reg, xp, installed)
     status_emoji, status_detail = _ping_registry()
 
-    logo_path = primary_icon_path()
-    header_l, header_m, header_r = st.columns([1, 5, 1])
-    with header_l:
-        if logo_path.is_file():
-            st.image(str(logo_path), width=44)
-        else:
-            st.markdown("#### 🛒")
-    with header_m:
+    logo_uri = _logo_data_uri()
+    img_html = f'<img src="{logo_uri}" style="width:40px;height:40px;object-fit:contain;border-radius:6px" alt=""/>' if logo_uri else "🛒"
+
+    # —— شريط علوي رفيع: شعار يسار، عنوان، خروج يمين (RTL) ——
+    hb1_l, hb1_m, hb1_r = st.columns([1, 6, 1])
+    with hb1_l:
+        st.markdown(f'<div style="text-align:right;padding:2px 0">{img_html}</div>', unsafe_allow_html=True)
+    with hb1_m:
         st.markdown(
-            "<div style='text-align:center;font-size:clamp(1rem,2vw,1.25rem);margin:0;padding:0.1rem 0'>"
-            "<strong>علي جدّي — لوحة المتجر</strong></div>",
+            "<div style='text-align:center;font-weight:700;font-size:clamp(0.88rem,1.6vw,1.05rem);padding:4px 0'>"
+            "🛒 علي جدّي — لوحة المتجر</div>",
             unsafe_allow_html=True,
         )
-    with header_r:
+    with hb1_r:
         if st.button("خروج", key="logout"):
             st.session_state["store_authed"] = False
             st.rerun()
 
-    st.markdown('<div id="alijaddi-dashboard">', unsafe_allow_html=True)
+    # —— الصف 1: أربع بطاقات (HTML grid، بدون أعمدة Streamlit) ——
+    st.markdown(
+        f"""
+<div class="aj-row1-grid">
+  <div class="aj-metric-card">✅ مرات النجاح<strong>{n_ok}</strong></div>
+  <div class="aj-metric-card">⭐ التحصيلات (نجوم)<strong>{n_stars}</strong></div>
+  <div class="aj-metric-card">🔗 المفصلات (اختصارات)<strong>{n_hinges}</strong></div>
+  <div class="aj-metric-card">📱 التطبيقات المتاحة<strong>{n_apps}</strong></div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
 
-    # —— الصف 1: إحصائيات ——
-    st.markdown('<div class="aj-row1">', unsafe_allow_html=True)
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f'<div class="aj-metric-card">✅ مرات النجاح<br><strong>{n_ok}</strong></div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown(f'<div class="aj-metric-card">⭐ التحصيلات (نجوم)<br><strong>{n_stars}</strong></div>', unsafe_allow_html=True)
-    with c3:
-        st.markdown(f'<div class="aj-metric-card">🔗 المفصلات (اختصارات)<br><strong>{n_hinges}</strong></div>', unsafe_allow_html=True)
-    with c4:
-        st.markdown(f'<div class="aj-metric-card">📱 التطبيقات المتاحة<br><strong>{n_apps}</strong></div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # —— الصف 2 ——
-    st.markdown('<div class="aj-row2">', unsafe_allow_html=True)
-    left, right = st.columns(2)
+    # —— الصف 2: عمودان — تطبيقات يسار | ليدر بورد + سجل يمين (LTR داخل الصف ليبقى التطبيقات يسار) ——
+    left, right = st.columns(2, gap="small")
 
     with left:
-        st.markdown('<div class="aj-panel"><h4>📲 التطبيقات المتاحة</h4>', unsafe_allow_html=True)
+        st.markdown('<p class="aj-panel-title">📲 التطبيقات المتاحة</p>', unsafe_allow_html=True)
         cards_html = "".join(
             f'<div class="aj-app-card"><b>{html.escape(m["name"])}</b><br>v{html.escape(m["version"])}<br>'
             f"<small>{html.escape(m['id'])}</small></div>"
             for m in manifests
         )
-        empty_apps = '<span style="opacity:0.6">—</span>'
+        empty_apps = '<span style="opacity:0.55;padding:0.5rem">—</span>'
         st.markdown(
-            f'<div class="aj-scroll-x">{cards_html or empty_apps}</div>',
+            f'<div class="aj-scroll-x-apps">{cards_html or empty_apps}</div>',
             unsafe_allow_html=True,
         )
-
         pick_ids = [m["id"] for m in manifests]
         pick_labels = [f"{m['name']} ({m['version']})" for m in manifests]
         if pick_ids:
-            idx = st.selectbox("اختر تطبيقاً للتثبيت على سطح المكتب (.url)", range(len(pick_ids)), format_func=lambda i: pick_labels[i], label_visibility="visible")
+            idx = st.selectbox(
+                "اختر تطبيقاً للتثبيت على سطح المكتب (.url)",
+                range(len(pick_ids)),
+                format_func=lambda i: pick_labels[i],
+                label_visibility="visible",
+            )
             consent = st.checkbox(
                 "أوافق على إنشاء اختصار .url وفق معيار المتجر **store_consent_v2**",
                 value=False,
@@ -433,39 +565,41 @@ def main() -> None:
                         st.success(f"تم الإنشاء: {p}")
                     else:
                         st.error("تعذّر إنشاء الملف — تحقق من سطح المكتب أو نظام التشغيل.")
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with right:
-        st.markdown('<div class="aj-panel" style="height:48%;margin-bottom:0.35rem"><h4>🏆 أفضل المستخدمين</h4><div class="aj-scroll-y">', unsafe_allow_html=True)
+        st.markdown('<p class="aj-panel-title">🏆 أفضل المستخدمين</p>', unsafe_allow_html=True)
         lb = _contributors(xp)
         if lb:
             st.dataframe(
-                [{"الترتيب": c.get("rank", i + 1), "الاسم": c.get("name", ""), "النجوم": c.get("stars", 0)} for i, c in enumerate(lb)],
+                [
+                    {"الترتيب": c.get("rank", i + 1), "الاسم": c.get("name", ""), "النجوم": c.get("stars", 0)}
+                    for i, c in enumerate(lb)
+                ],
                 hide_index=True,
                 use_container_width=True,
-                height=min(220, 38 * (len(lb) + 1)),
+                height=min(200, 28 + 32 * min(len(lb) + 1, 8)),
             )
         else:
             st.caption("لا بيانات.")
-        st.markdown("</div></div>", unsafe_allow_html=True)
 
-        st.markdown('<div class="aj-panel" style="flex:1;min-height:120px"><h4>📜 سجل الاستخدام</h4><div class="aj-scroll-y">', unsafe_allow_html=True)
+        st.markdown('<p class="aj-panel-title">📜 سجل الاستخدام</p>', unsafe_allow_html=True)
         ur = _usage_table_rows(stats)
         if ur:
-            st.dataframe(ur, hide_index=True, use_container_width=True, height=min(200, 36 * (len(ur) + 1)))
+            st.dataframe(
+                ur,
+                hide_index=True,
+                use_container_width=True,
+                height=min(180, 28 + 30 * min(len(ur) + 1, 7)),
+            )
         else:
             st.caption("لا سجل محلي بعد.")
-        st.markdown("</div></div>", unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # —— الصف 3 ——
-    st.markdown('<div class="aj-row3">', unsafe_allow_html=True)
-    u1, u2, u3, u4 = st.columns([3, 1, 1, 1])
+    # —— الصف 3: تحديثات + حالة خادم + أزرار ——
+    u1, u2, u3, u4 = st.columns([3.2, 1, 1, 1], gap="small")
     with u1:
         st.markdown(
-            f"<div style='line-height:1.25'><b>📰 التحديثات</b><br><small>{_updates_snippet_html(reg, manifests)}</small><br>"
-            f"<b>حالة الخادم:</b> {html.escape(status_emoji)} — <small>{html.escape(status_detail)}</small> — "
+            f"<div class='aj-updates-line'><b>📰 التحديثات</b><br><small>{_updates_snippet_html(reg, manifests)}</small><br>"
+            f"<b>🖥 حالة الخادم:</b> {html.escape(status_emoji)} — <small>{html.escape(status_detail)}</small> — "
             f"{html.escape(datetime.now().strftime('%H:%M:%S'))}</div>",
             unsafe_allow_html=True,
         )
@@ -481,9 +615,6 @@ def main() -> None:
             if st.session_state["_stop_ok"] >= 2:
                 os._exit(0)
             st.warning("اضغط «إيقاف» مرة ثانية للخروج من العملية.")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":

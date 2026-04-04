@@ -5,14 +5,15 @@ import platform
 import shutil
 from pathlib import Path
 from functools import partial
+from threading import Thread
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QLineEdit, QScrollArea, QFrame, QGridLayout, QStackedWidget,
     QSizePolicy, QCheckBox, QMessageBox, QSpacerItem,
-    QToolButton, QApplication, QComboBox, QButtonGroup,
+    QToolButton, QApplication, QComboBox, QButtonGroup, QProgressDialog,
 )
-from PySide6.QtCore import Qt, QSize, Signal, QTimer, QUrl
+from PySide6.QtCore import Qt, QSize, Signal, QTimer, QUrl, QObject
 from PySide6.QtGui import QFont, QPixmap, QIcon, QColor, QPainter, QCursor, QGuiApplication, QDesktopServices
 
 from ui.theme_qt import (
@@ -33,9 +34,13 @@ from services.addon_manager import (
     get_registry_offline_first,
     refresh_registry_background,
     installed_app_path,
+    install_model_sync,
 )
 from services.paths import primary_icon_path, bundle_root
-from services.store_install_standard import STORE_INSTALL_CONTRACT_VERSION
+from services.store_install_standard import (
+    STORE_INSTALL_CONTRACT_VERSION,
+    run_store_install_consent,
+)
 from services.model_catalog import load_qt_models
 from services.platform_data import LEADERBOARD_FALLBACK
 from services.store_experience import (
@@ -131,6 +136,13 @@ def _outline_btn(text, color, callback):
     btn.setCursor(Qt.PointingHandCursor)
     btn.clicked.connect(callback)
     return btn
+
+
+class _StoreInstallBridge(QObject):
+    """إشارات من خيط التثبيت إلى الواجهة (آمنة بين الخيوط)."""
+
+    progress = Signal(str)
+    finished = Signal(bool, str)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -264,9 +276,10 @@ class ModelCard(CardFrame):
 # ═══════════════════════════════════════════════════════════
 
 class AddonCard(CardFrame):
-    """بطاقة المتجر: التثبيت/التحديث/الإزالة عبر Ali12 (سطر أوامر) — لا تنزيل داخل المنصّة."""
+    """بطاقة المتجر: تنزيل وتثبيت من الواجهة (store_consent_v2) أو Ali12 / فتح الرابط."""
     ali12_store_help_requested = Signal(str)
     update_requested = Signal(str, str, str, str)
+    store_install_requested = Signal(str, str, str, str, str)
 
     def __init__(self, model: dict, theme: ThemeManager, registry: dict, parent=None):
         super().__init__(parent)
@@ -377,9 +390,25 @@ class AddonCard(CardFrame):
             )
             acts_col.addLayout(acts_row)
         elif model_installed and exists:
+            if new_ver and dl:
+                acts_col.addWidget(
+                    _icon_btn(
+                        "تحديث من المنصّة",
+                        STAR,
+                        partial(
+                            self._emit_store_install,
+                            mid,
+                            dl,
+                            folder,
+                            new_ver,
+                            name,
+                        ),
+                        min_h=40,
+                    )
+                )
             if new_ver:
                 up_lbl = _label(
-                    f"يتوفر في المتجر إصدار {new_ver} — حدّث عبر Ali12 (نفس أمر التثبيت من سطر الأوامر).",
+                    f"يتوفر في المتجر إصدار {new_ver} — يمكن التحديث من الزر أعلاه أو عبر Ali12.",
                     11, color=STAR, wrap=True,
                 )
                 up_lbl.setWordWrap(True)
@@ -401,6 +430,21 @@ class AddonCard(CardFrame):
                 )
             acts_col.addLayout(acts_row)
         elif active and dl:
+            acts_col.addWidget(
+                _icon_btn(
+                    "تنزيل وتثبيت",
+                    color,
+                    partial(
+                        self._emit_store_install,
+                        mid,
+                        dl,
+                        folder,
+                        ver,
+                        name,
+                    ),
+                    min_h=40,
+                )
+            )
             acts_row.addWidget(
                 _icon_btn(
                     "تعليمات التثبيت (Ali12)", color,
@@ -429,6 +473,16 @@ class AddonCard(CardFrame):
     def _emit_ali12_help(self, mid: str):
         self.ali12_store_help_requested.emit(mid)
 
+    def _emit_store_install(
+        self,
+        mid: str,
+        url: str,
+        folder: str,
+        version: str,
+        display_name: str,
+    ) -> None:
+        self.store_install_requested.emit(mid, url, folder, version, display_name)
+
     def _emit_update(self, mid, url, folder, ver):
         self.update_requested.emit(mid, url, folder, ver)
 
@@ -451,6 +505,8 @@ class MainWindow(QMainWindow):
         self._registry = get_registry_offline_first()
         self._store_experience = get_store_experience_offline_first()
         self._patch_platform_model_version_from_registry()
+        self._store_install_running = False
+        self._store_install_bridge: _StoreInstallBridge | None = None
         self._activity_group = QButtonGroup(self)
         self._activity_group.setExclusive(True)
         self._status_label = None
@@ -856,9 +912,8 @@ class MainWindow(QMainWindow):
         h_lay.setSpacing(8)
         hero_title = _label("تطبيقاتك في لمحة", 17, bold=True, color=t.text)
         hero_sub = _label(
-            "التثبيت والتحديث عبر **Ali12** (سطر الأوامر) — المعيار "
-            f"{STORE_INSTALL_CONTRACT_VERSION}. المنصّة تعرض الحالة والمتجر فقط؛ "
-            "تشغيل التطبيق من اختصاره أو من مجلد التثبيت — دون تدخل المنصّة في العمليات.",
+            "التثبيت والتحديث من **متجر التطبيقات** (زر «تنزيل وتثبيت») أو عبر **Ali12** — المعيار "
+            f"{STORE_INSTALL_CONTRACT_VERSION}. تشغيل التطبيق من اختصاره أو من مجلد التثبيت.",
             12, color=t.text2, wrap=True,
         )
         hero_sub.setMaximumHeight(44)
@@ -1137,7 +1192,7 @@ class MainWindow(QMainWindow):
         hl.addWidget(_label("متجر التطبيقات", 17, bold=True, color=t.text))
         st_hint = _label(
             "**علي جدي (المنصّة):** بطاقة أولاً — إصدار `platform` من السجل بعد المزامنة، ثم تحديث أو صفحة GitHub. "
-            "**تطبيقات المتجر:** لا يُثبَّت من داخل الواجهة؛ استخدم **Ali12** من سطر الأوامر (زر «تعليمات التثبيت» على كل بطاقة). "
+            "**تطبيقات المتجر:** «تنزيل وتثبيت» من البطاقة (موافقة ثم مجلد) أو **Ali12** من سطر الأوامر (زر «تعليمات التثبيت»). "
             f"المعيار {STORE_INSTALL_CONTRACT_VERSION} — مدير التنزيلات (.alijaddi/downloads).",
             12, color=t.text2, wrap=True,
         )
@@ -1196,6 +1251,7 @@ class MainWindow(QMainWindow):
                 card = AddonCard(m, t, registry)
                 card.setFixedWidth(320)
                 card.ali12_store_help_requested.connect(self._on_ali12_store_help)
+                card.store_install_requested.connect(self._on_store_install_requested)
                 card.update_requested.connect(self._on_platform_store_card_action)
                 fh.addWidget(card)
             fw.setMinimumWidth(len(featured) * 332 + max(0, len(featured) - 1) * 12)
@@ -1220,6 +1276,7 @@ class MainWindow(QMainWindow):
         for i, m in enumerate(filtered_store):
             card = AddonCard(m, t, registry)
             card.ali12_store_help_requested.connect(self._on_ali12_store_help)
+            card.store_install_requested.connect(self._on_store_install_requested)
             card.update_requested.connect(self._on_platform_store_card_action)
             if grid_cols == 1:
                 card.setMaximumWidth(16777215)
@@ -1624,6 +1681,85 @@ class MainWindow(QMainWindow):
         """بطاقة المنصّة فقط — تحديث عبر GitHub / Setup وليس تثبيت ZIP للنماذج."""
         if mid == PLATFORM_STORE_ID:
             self._open_platform_update_from_store(registry_hint_ver=str(ver or ""))
+
+    def _on_store_install_requested(
+        self,
+        model_id: str,
+        download_url: str,
+        folder: str,
+        version: str,
+        display_name: str,
+    ) -> None:
+        """تنزيل وتثبيت من بطاقة المتجر — نفس عقد store_consent_v2 ومسار مدير التنزيلات."""
+        if self._store_install_running:
+            return
+        url = (download_url or "").strip()
+        if not url:
+            QMessageBox.warning(
+                self,
+                "تثبيت من المتجر",
+                "رابط التنزيل غير متوفر لهذا التطبيق في السجل الحالي.",
+            )
+            return
+        fol = (folder or model_id).strip()
+        ver = (version or "").strip() or "0"
+        disp = (display_name or model_id).strip()
+
+        prep = run_store_install_consent(
+            self,
+            model_id=model_id,
+            manifest_folder=fol,
+            version=ver,
+            display_name=disp,
+        )
+        if prep.apps_parent is None:
+            return
+
+        self._store_install_running = True
+        bridge = _StoreInstallBridge()
+        self._store_install_bridge = bridge
+        dlg = QProgressDialog(self)
+        dlg.setWindowTitle("تثبيت من المتجر")
+        dlg.setLabelText("جارٍ التحميل…")
+        dlg.setRange(0, 0)
+        dlg.setCancelButton(None)
+        dlg.setMinimumDuration(0)
+        dlg.setWindowModality(Qt.WindowModality.WindowModal)
+        bridge.progress.connect(dlg.setLabelText)
+
+        apps_parent = prep.apps_parent
+
+        def _on_finished(ok: bool, msg: str) -> None:
+            dlg.close()
+            self._store_install_running = False
+            self._store_install_bridge = None
+            box = QMessageBox(self)
+            box.setWindowTitle("تثبيت من المتجر")
+            box.setText(msg)
+            box.setIcon(
+                QMessageBox.Icon.Information if ok else QMessageBox.Icon.Warning
+            )
+            box.exec()
+            if ok:
+                self._full_rebuild()
+
+        bridge.finished.connect(_on_finished)
+
+        def _work() -> None:
+            ok, msg = install_model_sync(
+                model_id,
+                url,
+                fol,
+                ver,
+                display_name=disp,
+                apps_parent=apps_parent,
+                install_contract=STORE_INSTALL_CONTRACT_VERSION,
+                on_progress=lambda s: bridge.progress.emit(s),
+            )
+            bridge.finished.emit(ok, msg)
+
+        Thread(target=_work, daemon=True).start()
+        dlg.show()
 
     def _on_ali12_store_help(self, model_id: str) -> None:
         """شرح تثبيت/تحديث/إزالة التطبيقات عبر سطر أوامر Ali12 (خارج واجهة المنصّة)."""

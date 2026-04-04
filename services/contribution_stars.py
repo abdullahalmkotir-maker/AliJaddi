@@ -6,15 +6,12 @@
 """
 from __future__ import annotations
 
-import os
 from typing import Any, Optional
 
 import httpx
 
+from alijaddi.config import SUPABASE_ANON_KEY, SUPABASE_URL
 from services.local_store import add_session_stars, load_session
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 # نقاط مقترحة لكل نوع مساهمة (قابلة للضبط لاحقاً من السحابة)
 POINTS_TRAINING_EXPORT = 3

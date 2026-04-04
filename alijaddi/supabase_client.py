@@ -57,6 +57,20 @@ def fetch_user_stars_balance(
     return int(rows[0].get("stars_balance") or 0)
 
 
+def fetch_user_models(
+    supabase_url: str, supabase_anon_key: str, access_token: str, user_id: str
+) -> List[Dict[str, Any]]:
+    base = supabase_url.rstrip("/")
+    r = requests.get(
+        f"{base}/rest/v1/user_models",
+        params={"user_id": f"eq.{user_id}", "select": "*", "order": "model_name.asc"},
+        headers=_headers(supabase_anon_key, access_token),
+        timeout=30,
+    )
+    r.raise_for_status()
+    return list(r.json())
+
+
 def fetch_model_catalog(
     supabase_url: str, supabase_anon_key: str, access_token: str
 ) -> List[Dict[str, Any]]:

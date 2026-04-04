@@ -1,10 +1,10 @@
-# AliJaddi Beta 0.5.1 — Windows release: PyInstaller + ZIP مكمّل + مثبّت Inno (المعيار الرسمي، أسلوب Blender)
+# AliJaddi Beta 0.5.2 — Windows release: PyInstaller + ZIP مكمّل + مثبّت Inno (المعيار الرسمي، أسلوب Blender)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 Write-Host "=========================================="
-Write-Host " AliJaddi - Windows Build (Beta 0.5.1, PySide6)"
+Write-Host " AliJaddi - Windows Build (Beta 0.5.2, PySide6)"
 Write-Host "=========================================="
 
 python -m pip install pyinstaller PySide6-Essentials python-dotenv httpx requests --quiet
@@ -95,7 +95,7 @@ Write-Host ""
 Write-Host "=========================================="
 Write-Host " BUILD COMPLETE"
 $tanzeel = "$([char]0x062A)$([char]0x0646)$([char]0x0632)$([char]0x064A)$([char]0x0644)"
-Write-Host (" PRIMARY (end users / Blender-style): {0}\windows\AliJaddi-Beta-0.5.1-Setup.exe" -f $tanzeel)
-Write-Host (" Supplementary portable: {0}\windows\AliJaddi-Beta-0.5.1-Windows.zip" -f $tanzeel)
+Write-Host (" PRIMARY (end users / Blender-style): {0}\windows\AliJaddi-Beta-0.5.2-Setup.exe" -f $tanzeel)
+Write-Host (" Supplementary portable: {0}\windows\AliJaddi-Beta-0.5.2-Windows.zip" -f $tanzeel)
 Write-Host " Dev run without install: dist\AliJaddi\AliJaddi.exe"
 Write-Host "=========================================="

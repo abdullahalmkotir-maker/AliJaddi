@@ -1,14 +1,14 @@
 {
   "schema_version": 2,
-  "updated_at": "2026-04-04",
-  "platform": "0.5.1-beta",
+  "updated_at": "2026-04-03",
+  "platform": "0.5.2-beta",
   "repo": "abdullahalmkotir-maker/AliJaddi",
   "store_install_contract": "store_consent_v2",
   "platform_windows_distribution": "inno_setup_classic_blender_style",
   "models": [
     {
       "id": "alijaddi_platform",
-      "version": "0.5.1-beta",
+      "version": "0.5.2-beta",
       "manifest": "manifests/alijaddi_platform.json"
     },
     {

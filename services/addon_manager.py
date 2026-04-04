@@ -20,6 +20,7 @@ from typing import Callable, Optional
 
 import httpx
 
+from alijaddi.config import SUPABASE_ANON_KEY, SUPABASE_URL
 from services.desktop_shortcut import create_hosted_app_desktop_shortcut
 from services.local_store import cache_get, cache_set, _read, _write, _DIR
 from services.install_telemetry import emit_install_event
@@ -34,6 +35,10 @@ _RAW_BASE = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/{_GITHUB_BRANCH}"
 _INSTALLED_FILE = _DIR / "installed_addons.json"
 _REGISTRY_CACHE_KEY = "addon_registry"
 _TIMEOUT = 20
+# بعض الخوادم (بما فيها raw.githubusercontent.com) ترفض طلبات بلا User-Agent.
+_HTTP_HEADERS = {
+    "User-Agent": "AliJaddiStore/1.0 (+https://github.com/abdullahalmkotir-maker/AliJaddi)",
+}
 
 
 def version_sort_tuple(v: str) -> tuple[int, ...]:
@@ -67,10 +72,6 @@ def _safe_extractall(zf: zipfile.ZipFile, dest: Path) -> None:
         if dest_abs != target and dest_abs not in target.parents:
             raise ValueError(f"مسار يخرج عن مجلد الاستخراج: {name!r}")
     zf.extractall(dest_abs)
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://mfhtnfxdfpelrgzonxov.supabase.co").rstrip("/")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
-
 
 def _local_registry_path() -> Path:
     """مسار موحّد يعمل مع التطوير و‎PyInstaller‎ (‎bundle_root‎)."""
@@ -148,7 +149,9 @@ def installed_version(model_id: str) -> Optional[str]:
 def fetch_registry_github() -> Optional[dict]:
     """جلب السجل من GitHub raw content."""
     try:
-        r = httpx.get(f"{_RAW_BASE}/{_REGISTRY_PATH}", timeout=_TIMEOUT)
+        r = httpx.get(
+            f"{_RAW_BASE}/{_REGISTRY_PATH}", timeout=_TIMEOUT, headers=_HTTP_HEADERS
+        )
         if r.status_code == 200:
             data = r.json()
             cache_set(_REGISTRY_CACHE_KEY, data)
@@ -256,7 +259,7 @@ def fetch_manifest(model_id: str) -> Optional[dict]:
     """جلب manifest نموذج من GitHub أو محلياً."""
     manifest_url = f"{_RAW_BASE}/{_MANIFEST_DIR}/{model_id}.json"
     try:
-        r = httpx.get(manifest_url, timeout=_TIMEOUT)
+        r = httpx.get(manifest_url, timeout=_TIMEOUT, headers=_HTTP_HEADERS)
         if r.status_code == 200:
             return r.json()
     except Exception:
@@ -326,7 +329,13 @@ def install_model(
                 tmp_path = Path(tmp)
                 zip_path = tmp_path / f"{model_id}.zip"
 
-                with httpx.stream("GET", download_url, timeout=120, follow_redirects=True) as resp:
+                with httpx.stream(
+                    "GET",
+                    download_url,
+                    timeout=120,
+                    follow_redirects=True,
+                    headers=_HTTP_HEADERS,
+                ) as resp:
                     resp.raise_for_status()
                     total = int(resp.headers.get("content-length", 0))
                     downloaded = 0

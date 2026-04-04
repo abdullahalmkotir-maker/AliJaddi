@@ -1,5 +1,8 @@
 """
 كتالوج التطبيقات الموحّد — مصدر واحد لـ Qt و CLI (manifests + دمج ذكي + احتياطي).
+
+معرّفات النماذج المعتمدة للسحابة مذكورة في ``AliJaddi Cloud/python/integration/model_ids.py``
+(و``AliJaddiAccount/auth_model/model_ids.py``) كـ ``CANONICAL_MODEL_IDS``.
 """
 from __future__ import annotations
 

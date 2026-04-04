@@ -19,12 +19,10 @@ from typing import Any, Optional
 
 import httpx
 
+from alijaddi.config import SUPABASE_ANON_KEY, SUPABASE_URL
 from services.local_store import (
     save_session, load_session, clear_session, cache_set, cache_get,
 )
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://mfhtnfxdfpelrgzonxov.supabase.co").rstrip("/")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 SMTP_EMAIL = os.getenv("SMTP_EMAIL", "alijadditechnology@gmail.com")

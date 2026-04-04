@@ -22,6 +22,7 @@ ALI12_ENGINE_VERSION = "v2_weighted_jaccard"
 _HINT_NO_OS_STACK_SUFFIX = frozenset(
     {
         "platform_alijaddi_install",
+        "platform_store_update",
         "store_install_folder",
         "release_tanzeel_build",
         "post_install_ux",
@@ -218,6 +219,48 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
         if "install_flow" in blob and "store" in blob:
             s += 8.0
         return s if s > 14.0 else 0.0
+
+    def sc_platform_store_update(ctx: Ali12Context) -> float:
+        """تحديث تطبيق المنصّة من متجر Qt مقابل سجل GitHub (`platform`)."""
+        blob = f"{ctx.message} {ctx.combined_text}".lower()
+        score = 8.0 * jaccard_keywords(
+            blob,
+            frozenset(
+                {
+                    "تحديث",
+                    "منصة",
+                    "المنصة",
+                    "متجر",
+                    "سجل",
+                    "registry",
+                    "github",
+                    "releases",
+                    "إصدار",
+                    "اصدار",
+                    "alijaddi_platform",
+                }
+            ),
+        )
+        for phrase in (
+            "تحديث المنصة",
+            "تحديث المنصّة",
+            "من المتجر",
+            "زر التحديث",
+            "بطاقة المنصة",
+            "صفحة الإصدارات",
+            "تحديث علي",
+            "platform_store",
+        ):
+            if phrase in blob:
+                score += 26.0
+        if "platform" in blob and ("تحديث" in blob or "update" in blob or "أحدث" in blob):
+            score += 20.0
+        mid = str(ctx.detail.get("model_id", "") or "").lower()
+        if mid == "alijaddi_platform" and (
+            "تحديث" in blob or "update" in blob or "store" in blob or "متجر" in blob
+        ):
+            score += 40.0
+        return score if score > 24.0 else 0.0
 
     def sc_platform_alijaddi_install(ctx: Ali12Context) -> float:
         """منصّة علي جدّي: المعيار الرسمي مثبّت Inno (أسلوب Blender)؛ ZIP محمول مكمّل."""
@@ -420,9 +463,14 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
             "أو انسخ المجلد يدوياً تحت مدير التنزيلات (.alijaddi/downloads) كما في الوثائق.",
         ),
         _rule(
+            "platform_store_update",
+            sc_platform_store_update,
+            "**تحديث منصّة علي جدّي:** في **متجر التطبيقات** افتح بطاقة «علي جدي — المنصّة». إذا كان حقل **`platform`** في `addons/registry.json` على GitHub أحدث من إصدارك (`alijaddi.__version__`) يظهر زر التحديث → **صفحة إصدارات GitHub** لـ Setup.exe أو ZIP؛ أغلق المنصّة ثم ثبّت. **للمطوّر:** ارفع السجل مع تحديث `platform` ونسخة `alijaddi_platform`.",
+        ),
+        _rule(
             "store_install_folder",
             sc_store_install_flow,
-            "**متجر المنصّة:** التثبيت عبر **Ali12** — `python scripts/ali12_store_install.py install <model_id>` (`store_consent_v2`)؛ الافتراضي `.alijaddi/downloads` أو `--parent`. SmartScreen/مضاد فيروس: اسمح بالكتابة في المجلد.",
+            "**متجر المنصّة:** من الواجهة **«تنزيل وتثبيت»** على البطاقة (موافقة `store_consent_v2` + مجلد أب)، أو من الطرفية **Ali12:** `python scripts/ali12_store_install.py install <model_id>` — الافتراضي `.alijaddi/downloads` أو `--parent`. SmartScreen/مضاد فيروس: اسمح بالكتابة في المجلد.",
         ),
         _rule(
             "post_install_ux",
@@ -434,7 +482,7 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
             sc_platform_alijaddi_install,
             "**منصّة ويندوز — معيار تطبيقات النظام:** `…-Setup.exe` من `تنزيل\\\\windows` → **Program Files** + قائمة ابدأ + إزالة من «التطبيقات». **مكمّل:** `…-Windows.zip` + `AliJaddi.exe`. "
             "UAC: وافق لـ Program Files. **بناء Setup:** Inno 6 (`ISCC` غالباً تحت `%LocalAppData%\\\\Programs\\\\Inno Setup 6` بعد winget)؛ `ALIJADDI_SKIP_INNO=1` للـZIP فقط. "
-            "صامت: `/VERYSILENT /SUPPRESSMSGBOXES`. تطبيقات المتجر: **Ali12 CLI** + مجلد التنزيلات الافتراضي؛ التحديثات من سجل المتجر.",
+            "صامت: `/VERYSILENT /SUPPRESSMSGBOXES`. **تحديث المنصّة:** بطاقة المنصّة في المتجر + Releases؛ **تطبيقات المتجر:** زر «تنزيل وتثبيت» أو **Ali12 CLI**؛ مدير التنزيلات الافتراضي.",
         ),
         _rule(
             "http_404",

@@ -3,8 +3,8 @@
 معيار **store_consent_v2** — التثبيت الفعلي لتطبيقات المتجر يتم عبر **Ali12**
 (``scripts/ali12_store_install.py``) خارج واجهة المنصّة؛ الافتراضي **مدير تنزيلات** علي جدّي: ``~/.alijaddi/downloads``.
 
-دوال ``run_store_install_consent`` تبقى للتوافق مع شيفرة قديمة أو مسارات خاصة؛
-واجهة متجر Qt الحالية لا تستدعي التثبيت المباشر.
+دوال ``run_store_install_consent`` تُستدعى من واجهة المتجر (زر «تنزيل وتثبيت») ومن مسارات CLI؛
+ثم يُستدعى ``install_model`` / ``install_model_sync`` بعد اختيار مجلد الأب.
 
 **منصّة Windows:** المثبّت الرسمي Inno — ``AliJaddi_Setup.iss`` وبذور Ali12 في ``12/seeds/Ali12_seed.jsonl``.
 """
