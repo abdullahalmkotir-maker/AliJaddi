@@ -6,6 +6,7 @@
   python scripts/export_ali12_training_jsonl.py --only-failures path/out.jsonl
   python scripts/export_ali12_training_jsonl.py -o train.jsonl --with-ali12-seed
   python scripts/export_ali12_training_jsonl.py -o train.jsonl --with-all-seeds
+  python scripts/export_ali12_training_jsonl.py -o training/squad12_bundle.jsonl --seeds-only --with-all-seeds
 """
 from __future__ import annotations
 
@@ -53,53 +54,64 @@ def main() -> int:
         action="store_true",
         help="إلحاق كل ملفات 12/seeds/*_seed.jsonl (Ali12 + Hassan12 + Hussein12 …)",
     )
+    p.add_argument(
+        "--seeds-only",
+        action="store_true",
+        help="تجاهل telemetry_install_events.jsonl؛ اكتب البذور فقط (مع --with-ali12-seed أو --with-all-seeds)",
+    )
     args = p.parse_args()
 
-    if not args.input.is_file():
-        print(f"لا ملف: {args.input}", file=sys.stderr)
-        return 1
-
     n = 0
-    with args.input.open(encoding="utf-8") as fin, args.output.open("w", encoding="utf-8") as fout:
-        for line in fin:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                row = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if args.only_failures:
-                if row.get("success") is True:
+    if not args.seeds_only:
+        if not args.input.is_file():
+            print(f"لا ملف: {args.input}", file=sys.stderr)
+            return 1
+        with args.input.open(encoding="utf-8") as fin, args.output.open("w", encoding="utf-8") as fout:
+            for line in fin:
+                line = line.strip()
+                if not line:
                     continue
-                ek = row.get("event_kind", "")
-                if ek in ("install_ok", "uninstall_ok"):
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
                     continue
-            detail = row.get("detail") or {}
-            hint = detail.get("ali12_hint", "")
-            sigs = detail.get("ali12_signals")
-            rid = str(detail.get("ali12_rule_id", "") or "")
-            conf = detail.get("ali12_confidence")
-            if not hint or not sigs:
-                meta = recompute_from_telemetry_row(row)
-                hint = hint or meta.get("hint_ar", "")
-                sigs = sigs or meta.get("signals")
-                rid = rid or str(meta.get("rule_id", ""))
-                conf = conf if conf is not None else meta.get("confidence")
-            aid = str(row.get("assistant_model") or ALI12_ASSISTANT_ID).strip() or ALI12_ASSISTANT_ID
-            payload = training_payload_stub(
-                event_kind=str(row.get("event_kind", "")),
-                model_id=str(row.get("model_id", "")),
-                user_message_snippet=json.dumps(detail, ensure_ascii=False)[:600],
-                ali12_hint_ar=str(hint) if hint else "",
-                resolution_label=str(detail.get("human_resolution", "")),
-                ali12_signals=sigs if isinstance(sigs, dict) else None,
-                ali12_rule_id=rid,
-                ali12_confidence=conf if isinstance(conf, (int, float)) else None,
-                assistant_id=aid,
-            )
-            fout.write(json.dumps(payload, ensure_ascii=False) + "\n")
-            n += 1
+                if args.only_failures:
+                    if row.get("success") is True:
+                        continue
+                    ek = row.get("event_kind", "")
+                    if ek in ("install_ok", "uninstall_ok"):
+                        continue
+                detail = row.get("detail") or {}
+                hint = detail.get("ali12_hint", "")
+                sigs = detail.get("ali12_signals")
+                rid = str(detail.get("ali12_rule_id", "") or "")
+                conf = detail.get("ali12_confidence")
+                if not hint or not sigs:
+                    meta = recompute_from_telemetry_row(row)
+                    hint = hint or meta.get("hint_ar", "")
+                    sigs = sigs or meta.get("signals")
+                    rid = rid or str(meta.get("rule_id", ""))
+                    conf = conf if conf is not None else meta.get("confidence")
+                aid = str(row.get("assistant_model") or ALI12_ASSISTANT_ID).strip() or ALI12_ASSISTANT_ID
+                payload = training_payload_stub(
+                    event_kind=str(row.get("event_kind", "")),
+                    model_id=str(row.get("model_id", "")),
+                    user_message_snippet=json.dumps(detail, ensure_ascii=False)[:600],
+                    ali12_hint_ar=str(hint) if hint else "",
+                    resolution_label=str(detail.get("human_resolution", "")),
+                    ali12_signals=sigs if isinstance(sigs, dict) else None,
+                    ali12_rule_id=rid,
+                    ali12_confidence=conf if isinstance(conf, (int, float)) else None,
+                    assistant_id=aid,
+                )
+                fout.write(json.dumps(payload, ensure_ascii=False) + "\n")
+                n += 1
+    else:
+        if not (args.with_all_seeds or args.with_ali12_seed or args.with_euqid_seed):
+            print("مع --seeds-only استخدم --with-all-seeds أو --with-ali12-seed", file=sys.stderr)
+            return 2
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text("", encoding="utf-8")
     _ALI12_SEED = seeds_dir() / "Ali12_seed.jsonl"
     seed_paths: list[Path] = []
     if args.with_all_seeds:
