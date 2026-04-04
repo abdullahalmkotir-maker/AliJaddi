@@ -1,5 +1,6 @@
 # ═══ Python ═══
 __pycache__/
+.pytest_cache/
 *.py[cod]
 *.pyo
 *.egg-info/
@@ -43,3 +44,9 @@ supabase/.temp/
 تنزيل/android/*.apk
 تنزيل/android/*.aab
 installer/*.exe
+
+# ═══ Flutter / Dart ═══
+flutter_alijaddi/.dart_tool/
+flutter_alijaddi/build/
+flutter_alijaddi/.flutter-plugins-dependencies
+flutter_alijaddi/*.iml

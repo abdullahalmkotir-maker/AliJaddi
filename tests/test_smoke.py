@@ -9,7 +9,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 def test_version_matches_beta():
     from alijaddi import __version__
 
-    assert __version__ == "0.4.1-beta"
+    assert __version__ == "0.5.1-beta"
 
 
 def test_local_registry_platform():
@@ -17,7 +17,7 @@ def test_local_registry_platform():
 
     reg = fetch_registry_local()
     assert reg is not None
-    assert reg.get("platform") == "0.4.1-beta"
+    assert reg.get("platform") == "0.5.1-beta"
     models = reg.get("models", [])
     assert len(models) >= 1
 

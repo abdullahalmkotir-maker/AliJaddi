@@ -8,6 +8,7 @@ from services.addon_manager import (
     get_registry_offline_first,
     install_model_sync,
     is_remote_version_newer,
+    load_installed,
     refresh_registry_background,
     version_sort_tuple,
 )
@@ -106,3 +107,12 @@ def test_refresh_registry_background_fallback_offline(monkeypatch):
     assert done.wait(timeout=8)
     assert result[0][1] is False
     assert result[0][0] == local
+
+
+def test_load_installed_returns_dict_when_file_is_json_array(tmp_path, monkeypatch):
+    """JSON صالح كمصفوفة كان يسبب AttributeError في لوحات تعتمد على .items()."""
+    p = tmp_path / "installed_addons.json"
+    p.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr("services.addon_manager._INSTALLED_FILE", p)
+    assert load_installed() == {}
+    assert list(load_installed().items()) == []

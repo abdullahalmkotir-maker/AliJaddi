@@ -14,7 +14,8 @@ from typing import Any, Optional
 import httpx
 
 from alijaddi import __version__ as PLATFORM_VERSION
-from Ali12 import ALI12_ASSISTANT_ID, resolve_ali12
+from Ali12 import resolve_ali12
+from services.assistants_squad import pick_assistant_for_telemetry_detail
 from services.local_store import _DIR, load_session
 
 _TELEMETRY_FILE = _DIR / "telemetry_install_events.jsonl"
@@ -90,9 +91,11 @@ def emit_install_event(
         safe_detail["ali12_confidence"] = meta.get("confidence")
         safe_detail["ali12_signals"] = meta.get("signals")
 
+    assistant_model = pick_assistant_for_telemetry_detail(safe_detail, event_kind)
+
     record = {
         "ts": datetime.now(timezone.utc).isoformat(),
-        "assistant_model": ALI12_ASSISTANT_ID,
+        "assistant_model": assistant_model,
         "event_kind": event_kind,
         "model_id": model_id,
         "platform_app_version": PLATFORM_VERSION,
@@ -115,7 +118,7 @@ def emit_install_event(
         "platform_app_version": PLATFORM_VERSION,
         "client_os": record["client_os"],
         "success": success,
-        "assistant_model": ALI12_ASSISTANT_ID,
+        "assistant_model": assistant_model,
         "detail": safe_detail,
     }
     try:

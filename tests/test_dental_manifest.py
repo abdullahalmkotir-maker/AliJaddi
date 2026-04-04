@@ -16,6 +16,7 @@ def test_dental_manifest_structure():
     data = json.loads(p.read_text(encoding="utf-8"))
     assert data["id"] == "dental_assistant"
     assert data["folder"] == "AhmadFalahDentalAssistant"
+    assert "الياسري" in data.get("author", "") or "Yassiri" in data.get("author", "")
     assert data["launch"] == "streamlit run main.py"
     assert data["users"] == 198
     assert float(data["rating"]) >= 4.0

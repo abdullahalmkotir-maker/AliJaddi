@@ -1,0 +1,11 @@
+service: "service.py:AliJaddiAssistantService"
+labels:
+  owner: alijaddi
+  component: assistant-routing
+include:
+  - "*.py"
+python:
+  requirements_txt: "./requirements.txt"
+docker:
+  distro: debian
+  python_version: "3.11"

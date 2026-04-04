@@ -1,0 +1,20 @@
+AliJaddi — علي جدّي (Beta)
+========================
+
+مرحباً بك في معالج تثبيت منصّة علي جدّي.
+
+• سيتم نسخ التطبيق الجاهز (بعد بناء PyInstaller) إلى مجلد البرامج.
+• بعد اكتمال التثبيت يُنشأ اختصار على سطح المكتب وفي قائمة ابدأ.
+• لتثبيت تطبيقات المتجر من سطر الأوامر استخدم Ali12 (scripts/ali12_store_install.py) — المعيار store_consent_v2.
+
+اضغط «التالي» لمتابعة الاتفاقية ثم التثبيت.
+
+---
+
+Welcome to the AliJaddi setup wizard.
+
+• The packaged application (PyInstaller output) will be installed under Program Files.
+• A desktop shortcut and Start Menu entry will be created when setup finishes.
+• Store apps are installed via Ali12 CLI (see project scripts), not from this wizard.
+
+Click Next to review the agreement, then Install.

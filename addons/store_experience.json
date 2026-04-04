@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-04-04",
+  "featured_model_ids": ["euqid", "dental_assistant", "mudir", "tahlil", "zakhrafatan"],
+  "contributors": [
+    {"name": "أحمد الياسري", "stars": 520, "rank": 1},
+    {"name": "فاطمة", "stars": 480, "rank": 2},
+    {"name": "محمد", "stars": 390, "rank": 3},
+    {"name": "زينب", "stars": 310, "rank": 4},
+    {"name": "علي", "stars": 275, "rank": 5},
+    {"name": "نور", "stars": 210, "rank": 6},
+    {"name": "حسن", "stars": 185, "rank": 7}
+  ],
+  "policy_ar": "النسخ الاحتياطي في السحابة (AliJaddi Cloud) لبيانات المستخدم فقط — غير مخصص للعمل التجاري. الحساب والنجوم عبر AliJaddiAccount. المزامنة من المستودع كل دورة مجدولة.",
+  "training_squad_note": "سرب 12: Ali12 و Hassan12 و Hussein12 — البذور في 12/seeds/؛ التصدير scripts/export_ali12_training_jsonl.py؛ human_resolution وتصحيح الأخطاء يغذّي التدريب ويمنح نجوماً محلية."
+}

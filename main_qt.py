@@ -1,5 +1,5 @@
 """
-AliJaddi — Beta 0.4.1
+AliJaddi — Beta 0.5.1
 Desktop application powered by Qt for Python (PySide6).
 Supports: Windows • macOS • Android
 """

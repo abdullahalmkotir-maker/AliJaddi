@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-تصدير سجلات التثبيت/التشغيل المحلية إلى JSONL مهيأ لتدريب Ali12 (بعد إضافة human_resolution يدوياً أو في خط لاحق).
+تصدير سجلات التثبيت/التشغيل المحلية إلى JSONL مهيأ لتدريب مساعدي السرب (Ali12 / Hassan12 / Hussein12) — البذور في ``12/seeds/``؛ أضف human_resolution يدوياً أو في خط لاحق.
 
   python scripts/export_ali12_training_jsonl.py
   python scripts/export_ali12_training_jsonl.py --only-failures path/out.jsonl
@@ -18,8 +18,10 @@ _REPO = Path(__file__).resolve().parent.parent
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
-from Ali12 import recompute_from_telemetry_row, training_payload_stub
+from Ali12 import ALI12_ASSISTANT_ID, recompute_from_telemetry_row, training_payload_stub
 from services.install_telemetry import _TELEMETRY_FILE
+from services.contribution_stars import record_contribution
+from services.squad12_paths import all_seed_jsonl, seeds_dir
 
 
 def main() -> int:
@@ -39,7 +41,7 @@ def main() -> int:
     p.add_argument(
         "--with-ali12-seed",
         action="store_true",
-        help="إلحاق training/Ali12_seed.jsonl (البذور الموحّدة)",
+        help="إلحاق 12/seeds/Ali12_seed.jsonl (البذور الموحّدة)",
     )
     p.add_argument(
         "--with-euqid-seed",
@@ -49,7 +51,7 @@ def main() -> int:
     p.add_argument(
         "--with-all-seeds",
         action="store_true",
-        help="إلحاق كل ملفات training/*_seed.jsonl (الآن Ali12_seed.jsonl الموحّد)",
+        help="إلحاق كل ملفات 12/seeds/*_seed.jsonl (Ali12 + Hassan12 + Hussein12 …)",
     )
     args = p.parse_args()
 
@@ -84,6 +86,7 @@ def main() -> int:
                 sigs = sigs or meta.get("signals")
                 rid = rid or str(meta.get("rule_id", ""))
                 conf = conf if conf is not None else meta.get("confidence")
+            aid = str(row.get("assistant_model") or ALI12_ASSISTANT_ID).strip() or ALI12_ASSISTANT_ID
             payload = training_payload_stub(
                 event_kind=str(row.get("event_kind", "")),
                 model_id=str(row.get("model_id", "")),
@@ -93,13 +96,14 @@ def main() -> int:
                 ali12_signals=sigs if isinstance(sigs, dict) else None,
                 ali12_rule_id=rid,
                 ali12_confidence=conf if isinstance(conf, (int, float)) else None,
+                assistant_id=aid,
             )
             fout.write(json.dumps(payload, ensure_ascii=False) + "\n")
             n += 1
-    _ALI12_SEED = _REPO / "training" / "Ali12_seed.jsonl"
+    _ALI12_SEED = seeds_dir() / "Ali12_seed.jsonl"
     seed_paths: list[Path] = []
     if args.with_all_seeds:
-        seed_paths = sorted(_REPO.glob("training/*_seed.jsonl"))
+        seed_paths = all_seed_jsonl()
     elif args.with_ali12_seed or args.with_euqid_seed:
         seed_paths = [_ALI12_SEED]
     for seed in seed_paths:
@@ -114,6 +118,14 @@ def main() -> int:
                 fout.write(line + "\n")
                 n += 1
     print(f"Wrote {n} lines to {args.output.resolve()}")
+    if n > 0:
+        total = record_contribution(
+            "training_export",
+            points=None,
+            meta={"lines": n, "output": str(args.output.resolve())},
+        )
+        if total:
+            print(f"Contribution recorded — session stars (approx.): {total}")
     return 0
 
 

@@ -34,7 +34,7 @@ def main() -> None:
     )
     print("Telemetry dir:", _DIR)
     print("JSONL:", _TELEMETRY_FILE)
-    print("Tail the last lines of the JSONL file and debug-cb41d1.log after running the GUI.")
+    print("راجع آخر أسطر ملف JSONL أعلاه بعد تشغيل الواجهة إن لزم.")
 
 
 if __name__ == "__main__":

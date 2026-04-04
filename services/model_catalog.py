@@ -151,7 +151,7 @@ _FALLBACK_ENTRIES: list[dict[str, Any]] = [
     {
         "id": "dental_assistant",
         "name": "مساعد طبيب الأسنان",
-        "desc": "إدارة عيادة الأسنان — مدير تنزيلات؛ 198 مستخدم زائر؛ أحمد فلاح؛ Streamlit + Cloud",
+        "desc": "إدارة عيادة الأسنان — أحمد الياسري؛ مدير تنزيلات؛ 198 مستخدم زائر؛ Streamlit + Cloud",
         "icon": "MEDICAL_SERVICES_ROUNDED",
         "color": "#0D9488",
         "folder": "AhmadFalahDentalAssistant",
@@ -159,7 +159,7 @@ _FALLBACK_ENTRIES: list[dict[str, Any]] = [
         "rating": 4.6,
         "users": 198,
         "active": True,
-        "version": "1.3.2",
+        "version": "1.3.3",
         "size_mb": 50,
         "download_url": "https://raw.githubusercontent.com/abdullahalmkotir-maker/AliJaddi/main/packaging/dental_assistant.zip",
         "category": "medical",

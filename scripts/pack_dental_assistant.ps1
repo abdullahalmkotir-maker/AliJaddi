@@ -1,6 +1,6 @@
 <#!
   يبني dental_assistant.zip لرفعه على GitHub Releases (نفس tag مثل euqid: models-v1.0).
-  يجب أن يكون الجذر داخل الأرشيف باسم AhmadFalahDentalAssistant كما في manifest.
+  المطوّر المعروض في المتجر: أحمد الياسري. الجذر داخل الأرشيف يبقى AhmadFalahDentalAssistant كما في manifest (توافق الرابط الثابت).
 
   مثال:
     powershell -ExecutionPolicy Bypass -File scripts\pack_dental_assistant.ps1 `

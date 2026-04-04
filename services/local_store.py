@@ -8,7 +8,7 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-from threading import Lock
+from threading import RLock
 from typing import Any, Optional
 
 _DIR = Path.home() / ".alijaddi"
@@ -19,7 +19,7 @@ _SESSION_FILE = _DIR / "session.json"
 _STATS_FILE = _DIR / "usage_stats.json"
 _CACHE_FILE = _DIR / "cloud_cache.json"
 
-_lock = Lock()
+_lock = RLock()
 
 
 def _read(path: Path, default: Any = None) -> Any:
@@ -31,12 +31,16 @@ def _read(path: Path, default: Any = None) -> Any:
     return default if default is not None else {}
 
 
+def _write_impl(path: Path, data: Any) -> None:
+    try:
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+    except Exception:
+        pass
+
+
 def _write(path: Path, data: Any):
     with _lock:
-        try:
-            path.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
-        except Exception:
-            pass
+        _write_impl(path, data)
 
 
 # ═══════════════════════ SETTINGS ═══════════════════════
@@ -123,18 +127,27 @@ def _save_stats(s: dict):
 
 
 def record_launch(model_id: str):
-    s = _load_stats()
-    if model_id not in s["models"]:
-        s["models"][model_id] = {"launches": 0, "total_seconds": 0, "first_used": None, "last_used": None}
-    m = s["models"][model_id]
-    m["launches"] += 1
-    now = datetime.now().isoformat()
-    if not m["first_used"]:
-        m["first_used"] = now
-    m["last_used"] = now
-    s["total_launches"] += 1
-    s["last_model"] = model_id
-    _save_stats(s)
+    default = {
+        "models": {},
+        "favorites": [],
+        "total_launches": 0,
+        "last_model": None,
+    }
+    with _lock:
+        s = _read(_STATS_FILE, default)
+        for k, v in default.items():
+            s.setdefault(k, v)
+        if model_id not in s["models"]:
+            s["models"][model_id] = {"launches": 0, "total_seconds": 0, "first_used": None, "last_used": None}
+        m = s["models"][model_id]
+        m["launches"] += 1
+        now = datetime.now().isoformat()
+        if not m["first_used"]:
+            m["first_used"] = now
+        m["last_used"] = now
+        s["total_launches"] += 1
+        s["last_model"] = model_id
+        _write_impl(_STATS_FILE, s)
 
 
 def get_model_stats(model_id: str) -> dict:
@@ -148,14 +161,23 @@ def get_all_stats() -> dict:
 
 def toggle_favorite(model_id: str) -> bool:
     """يبدّل المفضلة ويرجع True إذا أصبح مفضلاً."""
-    s = _load_stats()
-    if model_id in s["favorites"]:
-        s["favorites"].remove(model_id)
-        _save_stats(s)
-        return False
-    s["favorites"].append(model_id)
-    _save_stats(s)
-    return True
+    default = {
+        "models": {},
+        "favorites": [],
+        "total_launches": 0,
+        "last_model": None,
+    }
+    with _lock:
+        s = _read(_STATS_FILE, default)
+        for k, v in default.items():
+            s.setdefault(k, v)
+        if model_id in s["favorites"]:
+            s["favorites"].remove(model_id)
+            _write_impl(_STATS_FILE, s)
+            return False
+        s["favorites"].append(model_id)
+        _write_impl(_STATS_FILE, s)
+        return True
 
 
 def is_favorite(model_id: str) -> bool:
@@ -172,9 +194,10 @@ _CACHE_TTL = 3600  # ساعة واحدة
 
 
 def cache_set(key: str, data: Any):
-    c = _read(_CACHE_FILE, {})
-    c[key] = {"data": data, "ts": time.time()}
-    _write(_CACHE_FILE, c)
+    with _lock:
+        c = _read(_CACHE_FILE, {})
+        c[key] = {"data": data, "ts": time.time()}
+        _write_impl(_CACHE_FILE, c)
 
 
 def cache_get(key: str) -> Optional[Any]:
@@ -186,4 +209,40 @@ def cache_get(key: str) -> Optional[Any]:
 
 
 def cache_clear():
-    _write(_CACHE_FILE, {})
+    with _lock:
+        _write_impl(_CACHE_FILE, {})
+
+
+def cache_invalidate(key: str) -> None:
+    """إزالة مفتاح واحد من الكاش (مثلاً stars بعد تغيير محلي)."""
+    with _lock:
+        c = _read(_CACHE_FILE, {})
+        if key in c:
+            del c[key]
+            _write_impl(_CACHE_FILE, c)
+
+
+def add_session_stars(delta: int) -> int:
+    """يزيد نجوم الجلسة المحفوظة ويعيد الرصيد الجديد (0 إن لا جلسة)."""
+    with _lock:
+        sess = _read(_SESSION_FILE)
+        if not sess or not sess.get("access_token"):
+            return 0
+        cur = int(sess.get("stars", 0) or 0)
+        new = max(0, cur + int(delta))
+        body = {
+            "email": str(sess.get("email", "")),
+            "user_id": str(sess.get("user_id", "")),
+            "access_token": str(sess.get("access_token", "")),
+            "refresh_token": str(sess.get("refresh_token", "")),
+            "stars": new,
+            "username": str(sess.get("username", "")),
+            "display_name": str(sess.get("display_name", "")),
+            "saved_at": datetime.now().isoformat(),
+        }
+        _write_impl(_SESSION_FILE, body)
+        c = _read(_CACHE_FILE, {})
+        if "stars" in c:
+            del c["stars"]
+            _write_impl(_CACHE_FILE, c)
+        return new

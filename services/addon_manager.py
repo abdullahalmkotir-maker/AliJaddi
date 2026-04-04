@@ -80,7 +80,10 @@ def _local_registry_path() -> Path:
 # ═══════════════════════ INSTALLED TRACKING ═══════════════════════
 
 def load_installed() -> dict:
-    return _read(_INSTALLED_FILE, {})
+    data = _read(_INSTALLED_FILE, {})
+    if not isinstance(data, dict):
+        return {}
+    return data
 
 
 def _save_installed(data: dict):

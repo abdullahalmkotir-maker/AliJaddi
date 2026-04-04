@@ -21,6 +21,10 @@ pyinstaller \
     --add-data "services:services" \
     --add-data "ui:ui" \
     --add-data "alijaddi:alijaddi" \
+    --add-data "12:12" \
+    --add-data "Ali12.py:." \
+    --add-data "Hussein12.py:." \
+    --add-data "Hassan12.py:." \
     --hidden-import "PySide6.QtWidgets" \
     --hidden-import "PySide6.QtCore" \
     --hidden-import "PySide6.QtGui" \
@@ -34,6 +38,9 @@ pyinstaller \
     --hidden-import "ui.toast" \
     --hidden-import "ui.download_dialog" \
     --hidden-import "alijaddi" \
+    --hidden-import "Ali12" \
+    --hidden-import "Hussein12" \
+    --hidden-import "Hassan12" \
     --noconfirm \
     main_qt.py
 

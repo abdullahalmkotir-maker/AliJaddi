@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "bundle_name": "squad12",
+  "description_ar": "سرب مساعدي المنصّة: Ali12 (تثبيت/تشخيص)، Hassan12 (خدمات/بوابات)، Hussein12 (تدريب JSONL/Bento). البذور في seeds/؛ التصدير عبر scripts/export_ali12_training_jsonl.py مع human_resolution.",
+  "assistants": [
+    {
+      "id": "Ali12",
+      "role_ar": "تثبيت المتجر، Inno/ZIP، أخطاء التحميل والفك",
+      "engine_file": "ali12_engine.py",
+      "seed_file": "seeds/Ali12_seed.jsonl"
+    },
+    {
+      "id": "Hassan12",
+      "role_ar": "هندسة الخدمات، بوابات، ومدير مسارات/مجلدات التنزيلات",
+      "engine_file": "hassan12_engine.py",
+      "loader": "Hassan12.py",
+      "seed_file": "seeds/Hassan12_seed.jsonl"
+    },
+    {
+      "id": "Hussein12",
+      "role_ar": "خطوط تدريب، human_resolution، BentoML/استدلال",
+      "engine_file": "hussein12_engine.py",
+      "loader": "Hussein12.py",
+      "seed_file": "seeds/Hussein12_seed.jsonl"
+    }
+  ],
+  "training": {
+    "export_script": "scripts/export_ali12_training_jsonl.py",
+    "contribution_module": "services.contribution_stars",
+    "routing_module": "services.assistants_squad"
+  }
+}

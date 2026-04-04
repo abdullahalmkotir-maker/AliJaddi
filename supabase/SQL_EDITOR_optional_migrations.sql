@@ -52,3 +52,18 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_models TO anon, authenticate
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.social_post_queue TO anon, authenticated, service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.stars_log TO anon, authenticated, service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.qanun_documents TO anon, authenticated, service_role;
+
+-- ---------------------------------------------------------------------------
+-- صلاحيات core/qanun + أحداث بدون anon (نسخة لوحة SQL — مطابقة لهجرة 20260418120000_rest_facade_grants_reconcile.sql)
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT USAGE ON SCHEMA core TO postgres, anon, authenticated, service_role;
+GRANT USAGE ON SCHEMA qanun TO postgres, anon, authenticated, service_role;
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA core TO postgres, anon, authenticated, service_role;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA core TO postgres, anon, authenticated, service_role;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA qanun TO postgres, anon, authenticated, service_role;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA qanun TO postgres, anon, authenticated, service_role;
+
+GRANT SELECT, INSERT ON public.platform_install_events TO authenticated, service_role;
+GRANT SELECT, INSERT ON public.user_contribution_events TO authenticated, service_role;

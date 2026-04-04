@@ -1,0 +1,41 @@
+اتفاقية ترخيص التثبيت — AliJaddi (Beta)
+========================================
+
+1) منح الترخيص
+   بمتابعة التثبيت فإنك توافق على تثبيت برنامج AliJaddi على هذا الجهاز وفقاً لهذه البنود.
+
+2) الاستخدام
+   البرنامج مخصص للاستخدام وفق سياسة المشروع. النسخ الاحتياطي في السحابة (عند تفعيله) لبيانات المستخدم فقط وليس للعمل التجاري كما في وثائق المنصّة.
+
+3) المساهمة في التحسين (اختياري)
+   قد تُجمع أحداث تشغيل/تثبيت مجهّلة الهوية لتحسين الاستقرار. يمكن دعم مساعدي المنصّة (Ali12 و Hassan12 و Hussein12) عبر تصدير بيانات تدريب JSONL وتصحيح الأخطاء — دون إلزام.
+
+4) إخلاء مسؤولية
+   البرنامج يُقدَّم «كما هو» في مرحلة البيتا. لا تضمن الجهة الناشرة خلواً كاملاً من العيوب.
+
+5) إلغاء التثبيت
+   يمكنك إزالة البرنامج من «الإعدادات > التطبيقات» في Windows.
+
+إذا لم توافق على البنود أعلاه، اضغط «إلغاء» وأغلق المعالج.
+
+---
+
+Installation License Agreement — AliJaddi (Beta)
+================================================
+
+1) Grant
+   By proceeding you agree to install AliJaddi on this computer under these terms.
+
+2) Use
+   Use is subject to project policy. Cloud backup (when enabled) is for user data only, not commercial use, as documented.
+
+3) Optional improvement data
+   Anonymous install/run telemetry may be collected for stability. You may help assistants (Ali12, Hassan12, Hussein12) via JSONL export and error correction — optional.
+
+4) Disclaimer
+   Beta software is provided «as is».
+
+5) Uninstall
+   Remove the app from Windows Settings > Apps.
+
+If you do not agree, click Cancel and exit the wizard.

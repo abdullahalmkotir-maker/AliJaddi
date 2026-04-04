@@ -1,10 +1,8 @@
 """النافذة الرئيسية — PySide6: تطبيقاتي، متجر التطبيقات، تجربة قريبة من متاجر الأنظمة."""
 from __future__ import annotations
 
-import os
 import platform
 import shutil
-import sys
 from pathlib import Path
 from functools import partial
 
@@ -22,11 +20,10 @@ from ui.theme_qt import (
     PRIMARY, DANGER, SUCCESS, STAR, ACCENT_CYAN,
 )
 from ui.login_dialog import LoginDialog
-from ui.hosted_app_dock import HostedAppDock
 from ui import i18n
 from services.auth_service import AuthService
 from services.local_store import (
-    record_launch, toggle_favorite, is_favorite, get_last_model,
+    toggle_favorite, is_favorite, get_last_model,
     get_all_stats, load_settings, set_setting, load_session,
 )
 from services.addon_manager import (
@@ -40,7 +37,12 @@ from services.addon_manager import (
 from services.paths import primary_icon_path, bundle_root
 from services.store_install_standard import STORE_INSTALL_CONTRACT_VERSION
 from services.model_catalog import load_qt_models
-from services.platform_data import LEADERBOARD
+from services.platform_data import LEADERBOARD_FALLBACK
+from services.store_experience import (
+    get_store_experience_offline_first,
+    refresh_store_experience_background,
+)
+from services.squad12_paths import seeds_dir, squad_root, squad_summary_ar
 from services.platform_store import (
     PLATFORM_STORE_ID,
     platform_releases_open_url,
@@ -136,7 +138,8 @@ def _outline_btn(text, color, callback):
 # ═══════════════════════════════════════════════════════════
 
 class ModelCard(CardFrame):
-    launch_requested = Signal(str)
+    """بطاقة «تطبيقاتي»: المنصّة لا تشغّل التطبيق — فقط حالة التثبيت وفتح المجلد."""
+    open_folder_requested = Signal(str)
     like_requested = Signal(str)
     store_requested = Signal(str)
 
@@ -202,11 +205,7 @@ class ModelCard(CardFrame):
         if active:
             rating = model.get("rating", 0)
             users = model.get("users", 0)
-            stats_all = get_all_stats().get("models", {}).get(model["id"], {})
-            launches = stats_all.get("launches", 0)
             r_text = f"⭐ {rating}  ·  {users} مستخدم"
-            if launches:
-                r_text += f"  ·  فُتح {launches} مرة"
             body.addWidget(_label(r_text, 12, color=theme.text2))
         else:
             body.addWidget(_label("سيتوفر قريباً", 12, color=theme.text2))
@@ -219,8 +218,10 @@ class ModelCard(CardFrame):
         acts = QHBoxLayout()
         acts.setSpacing(10)
         if active and exists:
-            run = _icon_btn("فتح التطبيق", color, partial(self._on_launch, mid), min_h=40)
-            run.setToolTip("تشغيل التطبيق على جهازك")
+            run = _icon_btn("مجلد التثبيت", color, partial(self._on_open_folder, mid), min_h=40)
+            run.setToolTip(
+                "فتح مجلد التطبيق في مستكشف الملفات. التشغيل من اختصار التطبيق أو يدوياً — المنصّة لا تشغّل العمليات."
+            )
             acts.addWidget(run)
         elif active:
             get_btn = _icon_btn("الحصول من المتجر", ACCENT_CYAN, partial(self._on_store, mid), min_h=40)
@@ -248,8 +249,8 @@ class ModelCard(CardFrame):
         if not active:
             self.setStyleSheet(self.styleSheet() + "QFrame#card { opacity: 0.7; }")
 
-    def _on_launch(self, mid):
-        self.launch_requested.emit(mid)
+    def _on_open_folder(self, mid):
+        self.open_folder_requested.emit(mid)
 
     def _on_store(self, mid):
         self.store_requested.emit(mid)
@@ -448,6 +449,7 @@ class MainWindow(QMainWindow):
         self._installed_only = False
         self._section_index = 0
         self._registry = get_registry_offline_first()
+        self._store_experience = get_store_experience_offline_first()
         self._patch_platform_model_version_from_registry()
         self._activity_group = QButtonGroup(self)
         self._activity_group.setExclusive(True)
@@ -489,12 +491,6 @@ class MainWindow(QMainWindow):
         body_lay.addWidget(self.stack, 1)
         root.addWidget(body_wrap, 1)
 
-        self._hosted_dock = HostedAppDock(self.theme, self)
-        self._hosted_dock.setAllowedAreas(Qt.BottomDockWidgetArea | Qt.RightDockWidgetArea)
-        # افتراضياً على اليمين لعرض المزيد من البطاقات دون تقليل ارتفاع المنطقة الرئيسية
-        self.addDockWidget(Qt.RightDockWidgetArea, self._hosted_dock)
-        self._hosted_dock.hide()
-
         root.addWidget(self._build_status_bar())
 
         self._activity_group.idClicked.connect(self._on_activity_clicked)
@@ -507,6 +503,61 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(0, lambda: self._apply_registry_refresh(reg, reached_remote))
 
         refresh_registry_background(_on_reg_done)
+
+        def _on_xp_done(data: dict, reached_remote: bool):
+            QTimer.singleShot(
+                0,
+                lambda d=data, r=reached_remote: self._apply_store_experience_refresh(d, r),
+            )
+
+        refresh_store_experience_background(_on_xp_done)
+
+        self._periodic_sync_timer = QTimer(self)
+        self._periodic_sync_timer.setInterval(10 * 60 * 1000)
+        self._periodic_sync_timer.timeout.connect(self._on_periodic_repo_sync)
+        if load_settings().get("auto_sync", True):
+            self._periodic_sync_timer.start()
+
+    def _contributors_for_ui(self) -> list:
+        xp = getattr(self, "_store_experience", None) or {}
+        rows = xp.get("contributors")
+        out: list = []
+        if isinstance(rows, list):
+            for i, u in enumerate(rows):
+                if not isinstance(u, dict):
+                    continue
+                name = str(u.get("name", "")).strip()
+                if not name:
+                    continue
+                stars = int(u.get("stars", 0) or 0)
+                rank = int(u.get("rank", i + 1) or i + 1)
+                out.append({"name": name, "stars": stars, "rank": rank})
+        if out:
+            return sorted(out, key=lambda x: x["rank"])
+        return list(LEADERBOARD_FALLBACK)
+
+    def _apply_store_experience_refresh(self, data: dict, reached_remote: bool) -> None:
+        del reached_remote  # محجوز لاحقاً (مثلاً شريط حالة مفصّل)
+        if isinstance(data, dict) and data.get("schema_version"):
+            self._store_experience = data
+        self._rebuild_current_tab()
+
+    def _on_periodic_repo_sync(self) -> None:
+        if not load_settings().get("auto_sync", True):
+            return
+
+        def _on_reg_done(reg: dict, reached_remote: bool):
+            QTimer.singleShot(0, lambda: self._apply_registry_refresh(reg, reached_remote))
+
+        refresh_registry_background(_on_reg_done)
+
+        def _on_xp_done(data: dict, reached_remote: bool):
+            QTimer.singleShot(
+                0,
+                lambda d=data, r=reached_remote: self._apply_store_experience_refresh(d, r),
+            )
+
+        refresh_store_experience_background(_on_xp_done)
 
     def _patch_platform_model_version_from_registry(self) -> None:
         """مزامنة رقم إصدار بطاقة المنصّة مع حقل ``platform`` في سجل المتجر."""
@@ -751,7 +802,6 @@ class MainWindow(QMainWindow):
     def _toggle_theme(self, _=None):
         self.theme.toggle()
         self.theme.apply(QApplication.instance())
-        self._hosted_dock.refresh_theme(self.theme)
         self._full_rebuild()
 
     def _full_rebuild(self):
@@ -778,7 +828,6 @@ class MainWindow(QMainWindow):
         self._section_index = cur
         self._sync_activity_checks()
         self._rebuild_current_tab()
-        self._hosted_dock.refresh_theme(self.theme)
 
     # ═══════════════════════════════════════
     #  TAB 0 — MODELS
@@ -807,9 +856,9 @@ class MainWindow(QMainWindow):
         h_lay.setSpacing(8)
         hero_title = _label("تطبيقاتك في لمحة", 17, bold=True, color=t.text)
         hero_sub = _label(
-            "التثبيت على سطح المكتب عبر **Ali12** (سطر الأوامر) — المعيار "
-            f"{STORE_INSTALL_CONTRACT_VERSION}. المنصّة تعرض التطبيقات وتشغّل المثبّتة؛ "
-            "المتجر يُظهر الإصدارات والتحديثات بعد مزامنة السجل.",
+            "التثبيت والتحديث عبر **Ali12** (سطر الأوامر) — المعيار "
+            f"{STORE_INSTALL_CONTRACT_VERSION}. المنصّة تعرض الحالة والمتجر فقط؛ "
+            "تشغيل التطبيق من اختصاره أو من مجلد التثبيت — دون تدخل المنصّة في العمليات.",
             12, color=t.text2, wrap=True,
         )
         hero_sub.setMaximumHeight(44)
@@ -950,7 +999,7 @@ class MainWindow(QMainWindow):
         grid.setVerticalSpacing(14)
         for i, m in enumerate(filtered):
             card = ModelCard(m, t)
-            card.launch_requested.connect(self._launch_model)
+            card.open_folder_requested.connect(self._open_install_folder)
             card.like_requested.connect(self._like_model)
             card.store_requested.connect(self._open_app_store)
             if cols == 1:
@@ -998,7 +1047,7 @@ class MainWindow(QMainWindow):
         sl.addWidget(_label(str(stars), 32, bold=True, color=t.star_color), alignment=Qt.AlignCenter)
         stats = get_all_stats()
         sl.addWidget(
-            _label(f"مرات فتح التطبيقات: {stats.get('total_launches', 0)}", 12, color=t.text2),
+            _label("التثبيت والتحديث عبر المتجر وAli12 — التشغيل خارج المنصّة.", 11, color=t.text2, wrap=True),
             alignment=Qt.AlignCenter,
         )
         sb_lay.addWidget(sc)
@@ -1010,7 +1059,7 @@ class MainWindow(QMainWindow):
         ll.setSpacing(6)
         ll.addWidget(_label("أفضل المستخدمين", 13, bold=True, color=t.text))
         medals = ["🥇", "🥈", "🥉"]
-        for u in LEADERBOARD[:4]:
+        for u in self._contributors_for_ui()[:4]:
             r = u["rank"]
             row = QHBoxLayout()
             row.addWidget(_label(medals[r - 1] if r <= 3 else f"#{r}", 14))
@@ -1115,6 +1164,45 @@ class MainWindow(QMainWindow):
         hl.addLayout(stats_row)
         col.addWidget(hdr)
 
+        policy_ar = (self._store_experience.get("policy_ar") or "").strip()
+        train_note = (self._store_experience.get("training_squad_note") or "").strip()
+        if policy_ar or train_note:
+            pol = CardFrame()
+            pl = QVBoxLayout(pol)
+            pl.setContentsMargins(12, 8, 12, 8)
+            pl.setSpacing(4)
+            if policy_ar:
+                pl.addWidget(_label(policy_ar, 10, color=t.text2, wrap=True))
+            if train_note:
+                pl.addWidget(_label(train_note, 10, color=t.text2, wrap=True))
+            col.addWidget(pol)
+
+        feat_ids = list(self._store_experience.get("featured_model_ids") or [])
+        by_id = {m["id"]: m for m in self.models}
+        featured = [by_id[i] for i in feat_ids if i in by_id]
+        if featured:
+            col.addWidget(_label("أبرز التطبيقات", 15, bold=True, color=t.text))
+            feat_scroll = QScrollArea()
+            feat_scroll.setWidgetResizable(True)
+            feat_scroll.setFrameShape(QFrame.NoFrame)
+            feat_scroll.setFixedHeight(400)
+            feat_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            feat_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            fw = QWidget()
+            fh = QHBoxLayout(fw)
+            fh.setContentsMargins(0, 0, 0, 0)
+            fh.setSpacing(12)
+            for m in featured:
+                card = AddonCard(m, t, registry)
+                card.setFixedWidth(320)
+                card.ali12_store_help_requested.connect(self._on_ali12_store_help)
+                card.update_requested.connect(self._on_platform_store_card_action)
+                fh.addWidget(card)
+            fw.setMinimumWidth(len(featured) * 332 + max(0, len(featured) - 1) * 12)
+            feat_scroll.setWidgetResizable(False)
+            feat_scroll.setWidget(fw)
+            col.addWidget(feat_scroll)
+
         store_search = QLineEdit()
         store_search.setPlaceholderText(i18n.tr("store_search_ph"))
         store_search.setMinimumHeight(40)
@@ -1159,12 +1247,15 @@ class MainWindow(QMainWindow):
         col.setSpacing(8)
         col.addWidget(_label("المتصدرون", 17, bold=True, color=t.text))
         col.addWidget(_label(
-            "ترتيب حسب رصيد النجوم — شارك التطبيق لترتفع في القائمة.",
+            "ترتيب حسب رصيد النجوم — يُحدَّث من مستودع علي جدي مع المزامنة الدورية.",
             12, color=t.text2, wrap=True,
         ))
+        src_note = (self._store_experience.get("policy_ar") or "").strip()
+        if src_note:
+            col.addWidget(_label(src_note, 10, color=t.text2, wrap=True))
 
         medals = ["🥇", "🥈", "🥉"]
-        for u in LEADERBOARD:
+        for u in self._contributors_for_ui():
             r = u["rank"]
             card = CardFrame()
             row = QHBoxLayout(card)
@@ -1312,6 +1403,40 @@ class MainWindow(QMainWindow):
             sc_lay.addWidget(w)
         col.addWidget(stats_card, alignment=Qt.AlignCenter)
 
+        squad_card = CardFrame()
+        squad_card.setMaximumWidth(500)
+        sql = QVBoxLayout(squad_card)
+        sql.setContentsMargins(18, 14, 18, 14)
+        sql.setSpacing(6)
+        sql.addWidget(_label("مساعدو السرب — مجلد 12", 15, bold=True, color=t.text))
+        sql.addWidget(_label(squad_summary_ar(), 11, color=t.text2, wrap=True))
+        sql.addWidget(
+            _label(
+                f"المسار: {squad_root()}\nالبذور: {seeds_dir()}",
+                10,
+                color=t.text2,
+                wrap=True,
+            )
+        )
+        sql.addWidget(
+            _label(
+                "Hassan12: 12/hassan12_engine.py — مدير مسارات التنزيلات (list_store_app_folders) + بوابات/خدمات.",
+                10,
+                color=t.text2,
+                wrap=True,
+            )
+        )
+        sql.addWidget(
+            _label(
+                "Hussein12: 12/hussein12_engine.py — تغذية التدريب: "
+                "python scripts/export_ali12_training_jsonl.py -o train.jsonl --with-all-seeds",
+                10,
+                color=t.text2,
+                wrap=True,
+            )
+        )
+        col.addWidget(squad_card, alignment=Qt.AlignCenter)
+
         # Usage
         usage = CardFrame()
         usage.setMaximumWidth(500)
@@ -1442,49 +1567,26 @@ class MainWindow(QMainWindow):
         """ينتقل إلى تبويب متجر التطبيقات (مثل «احصل» في المتاجر الشهيرة)."""
         self._set_section(1)
 
-    def _launch_model(self, model_id):
+    def _open_install_folder(self, model_id: str) -> None:
+        """فتح مجلد التطبيق في المستكشف — المنصّة لا تُشغّل التطبيق."""
         from ui.toast import show_toast
+
         model = next((m for m in self.models if m["id"] == model_id), None)
         if not model or not model.get("active", True):
-            return
-        launch_cmd = (model.get("launch") or "").strip()
-        if not launch_cmd:
-            show_toast(self, "لا يوجد أمر تشغيل مضبوط لهذا التطبيق.", "warning")
             return
         folder = installed_app_path(model_id, model.get("folder", ""))
         if not folder.is_dir():
             show_toast(
                 self,
-                f"التطبيق غير مثبّت. افتح «متجر التطبيقات» لاختيار مجلد التثبيت ثم التنزيل.",
+                "التطبيق غير مثبّت. من «متجر التطبيقات» ثبّت/حدّث عبر Ali12 حسب المعيار.",
                 "warning",
             )
             return
-        try:
-            env = os.environ.copy()
-            sess = load_session() or {}
-            tok = (sess.get("access_token") or "").strip()
-            if tok:
-                env["ALIJADDI_JWT"] = tok
-            env["ALIJADDI_PLATFORM_HOST"] = "1"
-            env["ALIJADDI_THEME"] = "dark" if self.theme.is_dark else "light"
-            env["ALIJADDI_APPS_ROOT"] = str(folder.parent.resolve())
-            if sys.platform == "win32":
-                env.setdefault("PYTHONUTF8", "1")
-            self._hosted_dock.start_app(
-                model.get("name", model_id),
-                launch_cmd,
-                folder,
-                env,
-                model_id=model_id,
-            )
-            record_launch(model_id)
-            show_toast(
-                self,
-                f"✓ جارٍ تشغيل {model.get('name', model_id)} — راقب لوحة «تشغيل داخل المنصّة»",
-                "success",
-            )
-        except Exception as e:
-            show_toast(self, str(e), "error")
+        url = QUrl.fromLocalFile(str(folder.resolve()))
+        if not QDesktopServices.openUrl(url):
+            show_toast(self, "تعذّر فتح المجلد.", "error")
+        else:
+            show_toast(self, f"✓ مجلد {model.get('name', model_id)}", "success")
 
     def _like_model(self, model_id):
         toggle_favorite(model_id)

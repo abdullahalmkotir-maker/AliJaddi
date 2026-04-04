@@ -3,7 +3,8 @@
 """
 from __future__ import annotations
 
-LEADERBOARD = [
+# احتياطي عند عدم جلب store_experience.json من المستودع
+LEADERBOARD_FALLBACK = [
     {"name": "أحمد", "stars": 520, "rank": 1},
     {"name": "فاطمة", "stars": 480, "rank": 2},
     {"name": "محمد", "stars": 390, "rank": 3},
@@ -12,3 +13,5 @@ LEADERBOARD = [
     {"name": "نور", "stars": 210, "rank": 6},
     {"name": "حسن", "stars": 185, "rank": 7},
 ]
+
+LEADERBOARD = LEADERBOARD_FALLBACK

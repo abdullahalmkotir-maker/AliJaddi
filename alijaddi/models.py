@@ -93,6 +93,14 @@ _CLOUD_ONLY: Dict[str, ModelInfo] = {
         "launch_cmd": "",
         "cloud_table": "model_user_data",
     },
+    "alijaddi": {
+        "name": "علي جدي — المركز",
+        "description": "حساب مركزي ومزامنة مع AliJaddi Cloud وAliJaddiAccount",
+        "icon": "☁️",
+        "project_folder": "",
+        "launch_cmd": "",
+        "cloud_table": "model_user_data",
+    },
 }
 
 

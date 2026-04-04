@@ -212,6 +212,17 @@ def test_training_payload_keys():
     assert p["task"] == "install_help"
 
 
+def test_training_payload_assistant_override():
+    p = ali12.training_payload_stub(
+        event_kind="install_fail",
+        model_id="",
+        user_message_snippet="x",
+        ali12_hint_ar="y",
+        assistant_id="Hassan12",
+    )
+    assert p["assistant_id"] == "Hassan12"
+
+
 def test_suggest_launch_fail_empty_cmd():
     s = ali12.suggest_after_install_failure(
         event_kind="launch_fail",
