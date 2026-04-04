@@ -16,7 +16,7 @@ for _d in (DATA_DIR, UPLOADS_DIR, BACKUPS_DIR):
 # ─── هوية النموذج (موحّدة مع core.model_catalog و manifests) ───
 MODEL_ID = "yassiri_smart_assistant"
 MODEL_NAME = "مساعد أحمد الياسري الذكي"
-MODEL_VERSION = "1.0.0"
+MODEL_VERSION = "1.0.1"
 # عمود schema_version في جدول model_user_data (PostgREST)
 MODEL_USER_DATA_SCHEMA_VERSION = 2
 

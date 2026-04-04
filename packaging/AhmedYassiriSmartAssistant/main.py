@@ -31,7 +31,7 @@ st.markdown(
     f'<p style="color:{PRIMARY_COLOR};font-size:1.1rem;font-weight:600">{MODEL_NAME}</p>',
     unsafe_allow_html=True,
 )
-st.caption(f"المعرّف: `{MODEL_ID}` — الإصدار {MODEL_VERSION} — أحمد الياسري")
+st.caption(f"المعرّف: `{MODEL_ID}` — إصدار {MODEL_VERSION} — أحمد الياسري — جاهز للتثبيت من متجر علي جدّي")
 
 col1, col2, col3 = st.columns(3)
 with col1:
