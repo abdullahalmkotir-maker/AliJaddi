@@ -1,0 +1,22 @@
+{
+  "id": "yassiri_smart_assistant",
+  "name": "مساعد أحمد الياسري الذكي",
+  "name_en": "Ahmed Al-Yassiri's Smart Assistant",
+  "desc": "تطبيق عيادة أسنان — قاعدة SQLite، بذور 156 مريضاً، تكامل AliJaddi Cloud عبر platform_sync؛ مُصدَّر من مجلد سطح المكتب إلى حزمة المتجر.",
+  "version": "1.0.0",
+  "author": "Ahmed Al-Yassiri (أحمد الياسري)",
+  "icon": "MEDICAL_SERVICES_ROUNDED",
+  "color": "#0D9488",
+  "category": "healthcare",
+  "tags": ["أسنان", "عيادة", "الياسري", "Streamlit", "Ali12", "سحابة"],
+  "folder": "AhmedYassiriSmartAssistant",
+  "launch": "streamlit run main.py",
+  "size_mb": 12,
+  "rating": 4.8,
+  "users": 0,
+  "active": true,
+  "download_url": "https://raw.githubusercontent.com/abdullahalmkotir-maker/AliJaddi/main/packaging/AhmedYassiriSmartAssistant.zip",
+  "dependencies": ["streamlit", "pandas", "plotly", "Pillow", "openpyxl", "requests", "python-dotenv"],
+  "screenshots": [],
+  "changelog": "1.0.0: إصدار المتجر — واجهة Streamlit + حزمة من تطبيقات علي جدي؛ معرّف نموذج مستقل yassiri_smart_assistant"
+}
