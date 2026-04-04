@@ -15,16 +15,40 @@ from services.addon_manager import (
 
 
 def test_offline_first_prefers_nonempty_local(monkeypatch):
-    local = {"schema_version": 2, "models": [{"id": "a", "version": "1.0.0"}]}
+    local = {
+        "schema_version": 2,
+        "platform": "0.5.1-beta",
+        "models": [{"id": "a", "version": "1.0.0"}],
+    }
     monkeypatch.setattr(
         "services.addon_manager.fetch_registry_local",
         lambda: local,
     )
     monkeypatch.setattr(
         "services.addon_manager.cache_get",
-        lambda _k: {"schema_version": 2, "models": [{"id": "b", "version": "2"}]},
+        lambda _k: {
+            "schema_version": 2,
+            "platform": "0.5.1-beta",
+            "models": [{"id": "b", "version": "2"}],
+        },
     )
     assert get_registry_offline_first() == local
+
+
+def test_offline_first_prefers_cache_when_platform_newer(monkeypatch):
+    local = {
+        "schema_version": 2,
+        "platform": "0.5.1-beta",
+        "models": [{"id": "a", "version": "1.0.0"}],
+    }
+    cached = {
+        "schema_version": 2,
+        "platform": "0.5.2-beta",
+        "models": [{"id": "b", "version": "2"}],
+    }
+    monkeypatch.setattr("services.addon_manager.fetch_registry_local", lambda: local)
+    monkeypatch.setattr("services.addon_manager.cache_get", lambda _k: cached)
+    assert get_registry_offline_first() == cached
 
 
 def test_offline_first_uses_cache_when_local_models_empty(monkeypatch):

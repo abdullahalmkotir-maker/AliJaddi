@@ -193,7 +193,12 @@ def fetch_registry_local() -> Optional[dict]:
 
 
 def get_registry_offline_first() -> dict:
-    """فوري للواجهة: محلي → كاش — بدون انتظار الشبكة (مناسب لتجربة أوفلاين)."""
+    """فوري للواجهة: محلي + كاش — بدون انتظار الشبكة.
+
+    إن وُجدت نسختان بقائمة نماذج غير فارغة، نفضّل السجل الذي يحمل ``platform`` أحدث
+    (آخر جلب ناجح إلى الكاش) حتى يظهر «تحديث المنصّة» حتى لو فشل الاتصال لاحقاً
+    والنسخة المضمّنة مع التطبيق أقدم.
+    """
     local = fetch_registry_local()
     cached = cache_get(_REGISTRY_CACHE_KEY)
 
@@ -204,10 +209,36 @@ def get_registry_offline_first() -> dict:
             and len(d["models"]) > 0
         )
 
-    if local and isinstance(local, dict) and _nonempty_models(local):
-        return local
-    if cached and isinstance(cached, dict) and _nonempty_models(cached):
-        return cached
+    def _platform_field(reg: dict) -> str:
+        return str(reg.get("platform") or "").strip()
+
+    def _pick_between(a: Optional[dict], b: Optional[dict]) -> Optional[dict]:
+        a_ok = isinstance(a, dict) and _nonempty_models(a)
+        b_ok = isinstance(b, dict) and _nonempty_models(b)
+        if a_ok and b_ok:
+            pa, pb = _platform_field(a), _platform_field(b)
+            if pa and pb:
+                if is_remote_version_newer(pb, pa):
+                    return b
+                if is_remote_version_newer(pa, pb):
+                    return a
+            elif pb and not pa:
+                return b
+            elif pa and not pb:
+                return a
+            return a
+        if a_ok:
+            return a
+        if b_ok:
+            return b
+        return a if isinstance(a, dict) else (b if isinstance(b, dict) else None)
+
+    picked = _pick_between(
+        local if isinstance(local, dict) else None,
+        cached if isinstance(cached, dict) else None,
+    )
+    if picked is not None and _nonempty_models(picked):
+        return picked
     if local and isinstance(local, dict):
         return local
     if cached and isinstance(cached, dict):
