@@ -5,7 +5,11 @@ from pathlib import Path
 import services.local_store as ls
 
 
-def test_add_session_stars_no_session():
+def test_add_session_stars_no_session(tmp_path: Path, monkeypatch):
+    monkeypatch.setattr(ls, "_DIR", tmp_path)
+    monkeypatch.setattr(ls, "_SESSION_FILE", tmp_path / "session.json")
+    monkeypatch.setattr(ls, "_CACHE_FILE", tmp_path / "cloud_cache.json")
+    monkeypatch.setattr(ls, "_SETTINGS_FILE", tmp_path / "settings.json")
     assert ls.add_session_stars(5) == 0
 
 
