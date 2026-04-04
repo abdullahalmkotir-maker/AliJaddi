@@ -470,7 +470,7 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
         _rule(
             "store_install_folder",
             sc_store_install_flow,
-            "**متجر المنصّة:** من الواجهة **«تنزيل وتثبيت»** على البطاقة (موافقة `store_consent_v2` + مجلد أب)، أو من الطرفية **Ali12:** `python scripts/ali12_store_install.py install <model_id>` — الافتراضي `.alijaddi/downloads` أو `--parent`. SmartScreen/مضاد فيروس: اسمح بالكتابة في المجلد.",
+            "**متجر المنصّة:** من الواجهة **«تنزيل وتثبيت»** على البطاقة (موافقة `store_consent_v2` + مجلد أب)، أو **Ali12:** `python scripts/ali12_store_install.py install <model_id>` — الافتراضي `.alijaddi/downloads` أو `--parent`. **تحديث تطبيق المنصّة نفسه:** `python scripts/ali12_store_install.py platform` ثم `--run` على ويندوز لـ Setup. SmartScreen/مضاد فيروس: اسمح بالكتابة في المجلد.",
         ),
         _rule(
             "post_install_ux",
@@ -482,7 +482,7 @@ def _default_rules() -> list[tuple[str, RuleFn, str]]:
             sc_platform_alijaddi_install,
             "**منصّة ويندوز — معيار تطبيقات النظام:** `…-Setup.exe` من `تنزيل\\\\windows` → **Program Files** + قائمة ابدأ + إزالة من «التطبيقات». **مكمّل:** `…-Windows.zip` + `AliJaddi.exe`. "
             "UAC: وافق لـ Program Files. **بناء Setup:** Inno 6 (`ISCC` غالباً تحت `%LocalAppData%\\\\Programs\\\\Inno Setup 6` بعد winget)؛ `ALIJADDI_SKIP_INNO=1` للـZIP فقط. "
-            "صامت: `/VERYSILENT /SUPPRESSMSGBOXES`. **تحديث المنصّة:** بطاقة المنصّة في المتجر + Releases؛ **تطبيقات المتجر:** زر «تنزيل وتثبيت» أو **Ali12 CLI**؛ مدير التنزيلات الافتراضي.",
+            "صامت: `/VERYSILENT /SUPPRESSMSGBOXES`. **تحديث المنصّة:** بطاقة المنصّة في المتجر + Releases؛ **Ali12:** `python scripts/ali12_store_install.py platform` (يبحث في الإصدارات عن Setup/ZIP باسم AliJaddi) ثم `--run` على ويندوز؛ **تطبيقات المتجر:** زر «تنزيل وتثبيت» أو `install <id>`.",
         ),
         _rule(
             "http_404",
