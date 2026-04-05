@@ -1,0 +1,13 @@
+{
+  "id": "euqid",
+  "name": "عقد",
+  "name_en": "Euqid — Contracts",
+  "desc": "صياغة العقود وتحليل النصوص محلياً — تكامل مع علي جدّي (JWT، model_user_data)",
+  "version": "1.1.0",
+  "author": "Ali Jaddi Platform",
+  "folder": "Applications AliJaddi/تطبيق عقد",
+  "launch": "streamlit run main.py",
+  "active": true,
+  "repository": "https://github.com/alijadditechnology/AliJaddi",
+  "supabase_project_url": "https://nzevwjghbvrrmmshnvem.supabase.co"
+}

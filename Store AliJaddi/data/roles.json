@@ -1,0 +1,17 @@
+{
+  "admin": {
+    "level": 1,
+    "permissions": ["*"],
+    "description": "مسؤول"
+  },
+  "reviewer": {
+    "level": 2,
+    "permissions": ["view", "review"],
+    "description": "مراجع"
+  },
+  "user": {
+    "level": 4,
+    "permissions": ["view"],
+    "description": "مستخدم"
+  }
+}
