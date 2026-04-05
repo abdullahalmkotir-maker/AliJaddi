@@ -33,7 +33,8 @@ flowchart TB
 | المنصّة | `AliJaddi/` — `main_qt.py`, `ui/`, `services/` | واجهة Qt، متجر النماذج، `addon_manager`، مصادقة |
 | السحابة | `AliJaddi Cloud/` — `python/integration/` | أدوات مساعدة، ضغط، REST؛ الهجرات في `AliJaddi/supabase/migrations/` |
 | الحساب | `AliJaddiAccount/` — `alijaddi_platform/desktop/launcher.py` | يُستدعى من `AliJaddi/launch.py` عند التشغيل بدون وسيطات |
-| نموذج مُدار من المنصّة | `~/.alijaddi/downloads/<Model>/` (+ توافق مع مسار سطح المكتب القديم) | رفع/جلب `payload` عبر `rest/v1/model_user_data` |
+| نموذج مُدار من المنصّة | `~/.alijaddi/downloads/<Model>/` | رفع/جلب `payload` عبر `rest/v1/model_user_data` |
+| بيانات قديمة (توافق) | `services/legacy_data.py` — حاضنة `سطح المكتب/تطبيقات علي جدي` ومجلد مسطّح باسم التطبيق | تُقرأ تلقائياً في `paths.app_dir` و`list_store_app_folders(include_legacy=True)`؛ لا تُحذف — للاستفادة من تثبيتات سابقة |
 
 ## متغيرات بيئة مشتركة
 

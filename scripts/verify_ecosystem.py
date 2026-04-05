@@ -14,20 +14,8 @@ import sys
 from pathlib import Path
 
 
-def _desktop_dirs() -> list[Path]:
-    home = Path.home()
-    out: list[Path] = []
-    for d in (home / "OneDrive" / "Desktop", home / "Desktop"):
-        if d.is_dir():
-            try:
-                out.append(d.resolve())
-            except OSError:
-                out.append(d)
-    return out
-
-
 def _store_download_bases() -> list[Path]:
-    """جذر مدير التنزيلات (.alijaddi/downloads) + الحاضنة القديمة على سطح المكتب إن وُجدت."""
+    """جذر مدير التنزيلات + جذور الحاضنة القديمة (انظر ``services.legacy_data``)."""
     out: list[Path] = []
     try:
         from services.paths import apps_root
@@ -35,13 +23,14 @@ def _store_download_bases() -> list[Path]:
         out.append(apps_root().resolve())
     except Exception:
         pass
-    for d in _desktop_dirs():
-        legacy = d / "تطبيقات علي جدي"
-        if legacy.is_dir():
-            try:
-                out.append(legacy.resolve())
-            except OSError:
-                out.append(legacy)
+    try:
+        from services.legacy_data import legacy_host_roots
+
+        for p in legacy_host_roots():
+            if p not in out:
+                out.append(p)
+    except Exception:
+        pass
     return out
 
 

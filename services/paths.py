@@ -2,7 +2,7 @@
 مسارات وقت التشغيل — حزمة PyInstaller، **مدير تنزيلات** علي جدّي (مجلدات التطبيقات المستخرجة)، الأيقونة الموحّدة.
 
 التطبيقات المُنزَّلة من المتجر تُفكّ افتراضياً تحت ``~/.alijaddi/downloads/<folder>``.
-يُحتفظ بالبحث عن التثبيتات القديمة تحت ``سطح المكتب/تطبيقات علي جدي`` لأغراض التوافق.
+التثبيتات القديمة تُحلّ عبر ``services.legacy_data`` (حاضنة سطح المكتب وغيرها).
 """
 from __future__ import annotations
 
@@ -10,14 +10,13 @@ import os
 import sys
 from pathlib import Path
 
+from services.legacy_data import LEGACY_DESKTOP_HOST_DIR_NAME
+
 # مجلد بيانات المنصّة (موحّد مع local_store)
 _ALIJADDI_DATA = Path.home() / ".alijaddi"
 
 # جذر «مدير التنزيلات»: أب مجلدات النماذج (اسم المجلد من manifest.folder)
 STORE_DOWNLOADS_DIR_NAME = "downloads"
-
-# قديم — حاضنة سطح المكتب (لا يُنشأ افتراضياً؛ يُفحص فقط للتوافق)
-LEGACY_DESKTOP_HOST_DIR_NAME = "تطبيقات علي جدي"
 
 # توافق اختبارات/شيفرة قديمة: كان يشير لاسم مجلد الحاضنة
 APPS_HOST_DIR_NAME = LEGACY_DESKTOP_HOST_DIR_NAME
@@ -37,18 +36,6 @@ def bundle_root() -> Path:
     return here.parent.parent
 
 
-def _desktop_candidates() -> list[Path]:
-    home = Path.home()
-    out: list[Path] = []
-    for d in (home / "OneDrive" / "Desktop", home / "Desktop"):
-        if d.is_dir():
-            try:
-                out.append(d.resolve())
-            except Exception:
-                out.append(d)
-    return out
-
-
 def apps_root() -> Path:
     """
     جذر تنزيلات متجر علي جدّي (مدير التنزيلات): ``~/.alijaddi/downloads`` افتراضياً.
@@ -66,25 +53,19 @@ def apps_root() -> Path:
 
 def app_dir(folder_name: str) -> Path:
     """
-    مسار تطبيق مثبّت: مدير التنزيلات الحالي أولاً، ثم الحاضنة القديمة على سطح المكتب، ثم مجلد باسم المشروع على سطح المكتب.
+    مسار تطبيق مثبّت: مدير التنزيلات الحالي أولاً، ثم بيانات **قديمة** عبر ``legacy_data``.
     """
-    name = (folder_name or "").strip()
-    primary = apps_root() / name
-    if primary.is_dir():
-        return primary
-    for d in _desktop_candidates():
-        old_host = d / LEGACY_DESKTOP_HOST_DIR_NAME / name
-        if old_host.is_dir():
-            return old_host
-        legacy = d / name
-        if legacy.is_dir():
-            return legacy
-    return primary
+    from services.legacy_data import resolve_app_path_with_source
+
+    path, _src = resolve_app_path_with_source(folder_name, apps_root())
+    return path
 
 
 def user_desktop_dir() -> Path | None:
     """أول سطح مكتب متاح (OneDrive أو Desktop) — لاختصارات .lnk."""
-    for d in _desktop_candidates():
+    from services.legacy_data import desktop_candidates
+
+    for d in desktop_candidates():
         if d.is_dir():
             return d
     return None

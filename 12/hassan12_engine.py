@@ -88,22 +88,43 @@ def apps_downloads_root() -> Path:
     return apps_root()
 
 
-def list_store_app_folders(*, max_items: int = 200) -> list[dict[str, str]]:
+def list_store_app_folders(*, max_items: int = 200, include_legacy: bool = True) -> list[dict[str, str]]:
     """
-    قائمة مجلدات التطبيقات المثبّتة تحت مدير التنزيلات — للواجهات والتدريب (أسماء فقط، بدون حذف).
+    قائمة مجلدات التطبيقات: مدير التنزيلات ``.alijaddi/downloads`` + اختيارياً **حاضنة قديمة**
+    ``سطح المكتب/تطبيقات علي جدي`` (انظر ``services.legacy_data``).
     """
+    from pathlib import Path
+
+    from services.legacy_data import SOURCE_STORE_DOWNLOADS, iter_legacy_install_entries
+
     root = apps_downloads_root()
-    if not root.is_dir():
-        return []
+    seen: set[str] = set()
     out: list[dict[str, str]] = []
-    try:
-        for p in sorted(root.iterdir(), key=lambda x: x.name.lower()):
-            if p.is_dir():
-                out.append({"name": p.name, "path": str(p.resolve())})
+
+    def add_row(name: str, path: Path, source: str) -> None:
+        key = str(path.resolve())
+        if key in seen:
+            return
+        seen.add(key)
+        row = {"name": name, "path": key, "source": source}
+        out.append(row)
+
+    if root.is_dir():
+        try:
+            for p in sorted(root.iterdir(), key=lambda x: x.name.lower()):
+                if p.is_dir():
+                    add_row(p.name, p, SOURCE_STORE_DOWNLOADS)
+                if len(out) >= max_items:
+                    return out
+        except OSError:
+            pass
+
+    if include_legacy and len(out) < max_items:
+        for row in iter_legacy_install_entries():
             if len(out) >= max_items:
                 break
-    except OSError:
-        return out
+            add_row(row["name"], Path(row["path"]), row.get("source", ""))
+
     return out
 
 
@@ -124,9 +145,9 @@ def hassan12_domain_hint_ar(text: str) -> str:
         )
     if any(k in tl for k in ("folder", "path", "file", "explorer", "download", "مجلد", "ملف", "مسار")):
         return (
-            "لمدير الملفات على المنصّة: تطبيقات المتجر تحت مجلد المستخدم "
-            "`.alijaddi/downloads` (أو ALIJADDI_APPS_ROOT). افتح المجلد من «تطبيقاتي» "
-            "أو استخدم list_store_app_folders() للقائمة؛ التثبيت/التحديث عبر Ali12."
+            "لمدير الملفات: التثبيت الحالي تحت `.alijaddi/downloads`؛ تثبيتات **قديمة** قد تظهر "
+            "تحت `تطبيقات علي جدي` على سطح المكتب — `list_store_app_folders(include_legacy=True)` "
+            "يجمع المصدرين؛ راجع `services/legacy_data.py`."
         )
     return (
         "للهندسة: اربط خدمات مصغّرة بعقود واضحة؛ اجعل الاستدلال خلف واجهة شبكة مستقلة عن عميل Qt."
